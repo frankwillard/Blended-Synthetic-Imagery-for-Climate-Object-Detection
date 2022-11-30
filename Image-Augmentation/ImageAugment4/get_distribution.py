@@ -1,7 +1,7 @@
 import glob
 
 def return_distribution(real_label_dir, domain, out_shape):
-    real_lbl_dir = f"{real_label_dir}/{domain}/"
+    real_lbl_dir = f"{real_label_dir}/{domain}/Real/"
     all_lbls = glob.glob(real_lbl_dir + "*.txt")
 
     out_ht, out_w = out_shape
