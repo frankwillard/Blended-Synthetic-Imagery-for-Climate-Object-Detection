@@ -4,6 +4,7 @@ from shutil import copyfile
 import random
 import itertools
 import json
+import argparse
 
 def createPath(curr_subdir):
     """[summary]
@@ -35,9 +36,9 @@ def run_one_to_one(gen_aug_dir, gen_dst_dir, results_dir, domains, n):
 
     for (src_domain, target_domain) in domain_combos:
 
-        src_dir = f"{gen_aug_dir}{src_domain}/canvases/"
-        mask_dir = f"{gen_aug_dir}{src_domain}/masks/"
-        lbl_dir = f"{gen_aug_dir}{src_domain}/labels/"
+        src_dir = f"{gen_aug_dir}/{src_domain}/canvases/"
+        mask_dir = f"{gen_aug_dir}/{src_domain}/masks/"
+        lbl_dir = f"{gen_aug_dir}/{src_domain}/labels/"
 
         all_srcs = glob.glob(src_dir + "*.jpg")
         all_masks = glob.glob(mask_dir + "*.png")
@@ -51,7 +52,7 @@ def run_one_to_one(gen_aug_dir, gen_dst_dir, results_dir, domains, n):
         
         #dest_dir = f"{gen_dst_dir}{target_domain}/"
 
-        dest_dir = f"{gen_dst_dir}{target_domain}/Background/"
+        dest_dir = f"{gen_dst_dir}/{target_domain}/Background/"
 
                 
         #Have background destination directories
@@ -69,7 +70,7 @@ def run_one_to_one(gen_aug_dir, gen_dst_dir, results_dir, domains, n):
 
         dict_name = f"s_{src_domain}_t_{target_domain}"
 
-        current_subdir = f"{results_dir}{dict_name}/"
+        current_subdir = f"{results_dir}/{dict_name}/"
         createPath(current_subdir)
 
         #Augmented: {s_src_t_target: [(augment, background)]
@@ -97,9 +98,28 @@ def run_one_to_one(gen_aug_dir, gen_dst_dir, results_dir, domains, n):
             #Copies txt file of mask to synthetic output
             
             copyfile(my_txt, blended_out.replace(".jpg",".txt"))
-            cmd = f"python run_gp_gan.py --src_image {my_src} --dst_image \"{my_dst}\" --mask_image {my_mask} --blended_image {my_mask} --gpu 1"
+            cmd = f"python run_gp_gan.py --src_image {my_src} --dst_image \"{my_dst}\" --mask_image {my_mask} --blended_image {my_mask}"
             print("Running command:")
             print(cmd)
             #os.system(cmd)
     
     return my_dict
+
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Creates n images blending images from src_dir and dst_dir through the GP-GAN')
+    parser.add_argument('--src-dir', type=str, required = True, help='Directory (do not include the final slash) for augmented canvases/masks/labels')
+    parser.add_argument('--dst-dir', type=str, required = True, help='Directory (do not include the final slash) for backgrounds (subdir of domain, subdir of Background)')
+    parser.add_argument('--results-dir', type=str, required = True, help='Directory (do not include the final slash) for output_images (subdir of s_src_t_target per domain combination)')
+    parser.add_argument('--domains', action = 'append', default = [], required = True, help='Domains in dataset')
+    parser.add_argument('--n_images_per_domain', type=int, required = True, help='Number of images to produce per domain combination')
+    args = parser.parse_args()
+
+    src_dir = args.src_dir
+    dst_dir = args.dst_dir
+    results_dir = args.results_dir
+    domains = args.domains
+    n = args.n_images_per_domain
+
+    run_one_to_one(src_dir, dst_dir, results_dir, domains, n)

@@ -81,7 +81,7 @@ if __name__ == "__main__":
   parser = argparse.ArgumentParser(description='Adds cropped images onto white canvas and creates GP-GAN masks and YOLO labels')
   parser.add_argument('--out-h', type=int, default=608, help='Height in output image shape')
   #parser.add_argument('--out-w', type=int, default=608, help='Width in output image shape')
-  parser.add_argument('--domains', action = 'append', default = [], required = True, help='Height in output image shape')
+  parser.add_argument('--domains', action = 'append', default = [], required = True, help='Domains in dataset')
   parser.add_argument('--num-outputs', type=int, required = True, help='Number of augmented images to produce')
   parser.add_argument('--cropped-dir', type=str, required = True, help='Directory (do not include the final slash) for cropped images/labels - Has a subdir of images and a subdir of labels (whose subdirs are the domain names)')
   parser.add_argument('--out-dir', type=str, required = True, help='Directory (do not include the final slash) for output augmentations (subdirs by domain)')
@@ -95,24 +95,18 @@ if __name__ == "__main__":
   parser.add_argument('--gp-gan-blend-offset', type=int, default = 20, help='How much to offset your crops from the border of image')
   args = parser.parse_args()
 
-#cropped = "/scratch/public/new_cropped_turbines/"
-#domains = ["EM", "NW", "SW"]
-#augmented_out_folder = "/scratch/public/augmented_images/"
-#my_out_shape = (608,608)
+  out_shape = (args.out_h, args.out_h)
+  domains = args.domains
+  cropped_dir = args.cropped_dir
+  output_dir = args.out_dir
+  num_outputs = args.num_outputs
+  metadata_json = args.metadata_json
+  num_to_sample_constant = args.num_to_sample_constant
+  num_to_sample_percentile = args.num_to_sample_percentile
+  offset_ctr = args.offset_ctr
+  gp_gan_blend_offset = args.gp_gan_blend_offset
+  real_dir = args.real_label_dir
 
-#Check if (height, width) or (width, height)
-out_shape = (args.out_h, args.out_h)
-domains = args.domains
-cropped_dir = args.cropped_dir
-output_dir = args.out_dir
-num_outputs = args.num_outputs
-metadata_json = args.metadata_json
-num_to_sample_constant = args.num_to_sample_constant
-num_to_sample_percentile = args.num_to_sample_percentile
-offset_ctr = args.offset_ctr
-gp_gan_blend_offset = args.gp_gan_blend_offset
-real_dir = args.real_label_dir
-
-csv_augment(my_out_shape = out_shape, domains = domains, cropped = cropped_dir, output_dir = output_dir, num_outputs = num_outputs,
- metadata_json = metadata_json, num_to_sample_constant = num_to_sample_constant,
- num_to_sample_percentile = num_to_sample_percentile, offset_ctr = offset_ctr, gp_gan_blend_offset = gp_gan_blend_offset, real_dir = real_dir)
+  csv_augment(my_out_shape = out_shape, domains = domains, cropped = cropped_dir, output_dir = output_dir, num_outputs = num_outputs,
+  metadata_json = metadata_json, num_to_sample_constant = num_to_sample_constant,
+  num_to_sample_percentile = num_to_sample_percentile, offset_ctr = offset_ctr, gp_gan_blend_offset = gp_gan_blend_offset, real_dir = real_dir)

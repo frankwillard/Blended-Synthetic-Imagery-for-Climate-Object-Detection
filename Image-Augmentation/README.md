@@ -13,12 +13,14 @@ crop_shadows goes through the real and shadow labels uses the shadow labels to c
 
 ## Image Augmentation
 
-sample_txts.py- From a directory containing txt files (in YOLOv3 format- contain location/size information), it samples 100 of these txt files and saves into an output file
+augment_images.py: 
+* Called by csv_augmenter- performs the augmentations. Outputs a user-defined quantity of canvases and their corresponding masks and labels (YOLO format)
 
-experiment2txts.txt- Sample output file from sample_txts.py
+csv_augmenter.py: 
+* For every domain, it samples cropped images and places them onto a canvas in random locations/rotations. 
+* User defines variables including buffer from image border, number of crops to place, how much to buffer the object in the mask going into GP-GAN (decreases chance of edges being blended away but increases surrounding context blended in)
+* Outputs metadata of matchings (output image) to JSON.
 
-csv_augmenter.py- Accepts txt file containing YOLOv3 files, cropped wind turbines (and coinciding bounding box information in YOLOv3 format), then samples txt files and runs augment_images.py
+get_distribution.py
+* Helper script that gets the distribution for a given domain using the directory- unnormalizes the YOLO labels and grabs the data. Has potential use case in csv_augmenter if you want to choose the number of objects placed on the canvas by percentile of the distribution for a given domains
 
-augment_images.py- Samples wind turbines and places them in specified location/size (based on sampled txt file) with random rotation (while preventing overlap with border/each other), performs same transformations to make coinciding binary mask, calculates relative size/positioning data for YOLOv3 bounding box txt file
-
-results9 folder- Contains output of running csv_augmenter.py- Several augmented images with coinciding binary masks and YOLOv3 bounding box txt files
