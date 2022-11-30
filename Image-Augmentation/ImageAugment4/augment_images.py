@@ -5,7 +5,7 @@ import random
 
 #{src}_{masknum}_{background_fname}
 
-def image_augmenter(cropped_turbines, domain, out_shape, relative, results_dir, out_fname, random_seed):
+def image_augmenter(cropped_turbines, domain, out_shape, relative, results_dir, out_fname, random_seed, num_to_sample):
   """[summary]
 
   Args:
@@ -41,7 +41,7 @@ def image_augmenter(cropped_turbines, domain, out_shape, relative, results_dir, 
   c = 0
   random.seed(random_seed)
 
-  ninetieth_percentile = 3
+  ninetieth_percentile = num_to_sample
   turbines_used = []
 
   while imgs < ninetieth_percentile and c < 100:

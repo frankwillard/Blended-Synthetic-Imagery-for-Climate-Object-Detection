@@ -18,7 +18,7 @@ def multiple_replace(dict, text):
   # For each match, look-up corresponding value in dictionary
   return regex.sub(lambda mo: dict[mo.string[mo.start():mo.end()]], text) 
 
-def csv_augment(my_out_shape, domains, cropped, output_dir, num_outputs, metadata_json):
+def csv_augment(my_out_shape, domains, cropped, output_dir, num_outputs, metadata_json, num_to_sample_percentile, num_to_sample_constant):
 
   replacer = {
     "images":"labels",
@@ -44,6 +44,14 @@ def csv_augment(my_out_shape, domains, cropped, output_dir, num_outputs, metadat
     #If use for real, would need to only use first 100 from domain file 
     num_imgs, width_turbines, height_turbines = return_distribution(domain)
 
+    if num_to_sample_percentile is not None:
+      sorted_imgs = sorted(height_turbines)
+      num_to_sample = sorted_imgs[int(num_to_sample_percentile / 100) * len(sorted_imgs)]
+    elif num_to_sample_constant is not None:
+      num_to_sample = num_to_sample_constant
+    else:
+      raise Exception("Did not give constant or percentile to determine number of crops to sample ")
+
     my_res_folder = f"{output_dir}/{domain}/"
 
     output_dict[domain] = {}
@@ -60,7 +68,7 @@ def csv_augment(my_out_shape, domains, cropped, output_dir, num_outputs, metadat
       print(my_out_fname)
 
       #Can pass in all sources and all relatives
-      turbines = image_augmenter(cropped_imgs, domain, my_out_shape,cropped_labels, my_res_folder,my_out_fname, i)
+      turbines = image_augmenter(cropped_imgs, domain, my_out_shape,cropped_labels, my_res_folder,my_out_fname, i, num_to_sample)
 
       output_dict[domain][my_out_fname] = turbines
 
@@ -78,6 +86,8 @@ if __name__ == "__main__":
   parser.add_argument('--cropped-dir', type=str, required = True, help='Directory (do not include the final slash) for cropped images/labels - Has a subdir of images and a subdir of labels (whose subdirs are the domain names)')
   parser.add_argument('--out-dir', type=str, required = True, help='Directory (do not include the final slash) for output augmentations (subdirs by domain)')
   parser.add_argument('--metadata-json', type=str, default = None, help='File name of JSON to output metadata on matchings to')
+  parser.add_argument('--num-to-sample-percentile', type=int, default = None, help='Number of crops to augment into new image (based on percentile of distribution for given domain)')
+  parser.add_argument('--num-to-sample-constant', type=int, default = None, help='Number of crops to augment into new image (constant)')
   args = parser.parse_args()
 
 #cropped = "/scratch/public/new_cropped_turbines/"
@@ -92,5 +102,7 @@ cropped_dir = args.cropped_dir
 output_dir = args.out_dir
 num_outputs = args.num_outputs
 metadata_json = args.metadata_json
+num_to_sample_constant = args.num_to_sample_constant
+num_to_sample_percentile = args.num_to_sample_percentile
 
-csv_augment(my_out_shape = out_shape, domains = domains, cropped = cropped_dir, output_dir = output_dir, num_outputs = num_outputs, metadata_json = metadata_json)
+csv_augment(my_out_shape = out_shape, domains = domains, cropped = cropped_dir, output_dir = output_dir, num_outputs = num_outputs, metadata_json = metadata_json, num_to_sample_constant = num_to_sample_constant, num_to_sample_percentile = num_to_sample_percentile)
