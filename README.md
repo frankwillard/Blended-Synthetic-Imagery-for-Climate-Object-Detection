@@ -1,14 +1,30 @@
 # Blended-Synthetic-Imagery-for-Climate-Object-Detection
 
+General pipeline:
+* Create set of cropped objects for each domain (./Image-Augmentation/crop_shadows.py)
+* Sample said objects and randomly place them on canvases, create corresponding masks and YOLO labels (./Image-Augmentation/csv_augmenter.py)
+
+
+## Assumed File Directory Structure
+
+
 ## Image-Augmentation
 
-augment_images.py: 
-* Called by csv_augmenter- performs the augmentations. Outputs a user-defined quantity of canvases and their corresponding masks and labels (YOLO format)
+[Image-Augmentation README](https://github.com/frankwillard/Blended-Synthetic-Imagery-for-Climate-Object-Detection/blob/main/Image-Augmentation/README.md)
 
-csv_augmenter.py: 
-* For every domain, it samples cropped images and places them onto a canvas in random locations/rotations. 
-* User defines variables including buffer from image border, number of crops to place, how much to buffer the object in the mask going into GP-GAN (decreases chance of edges being blended away but increases surrounding context blended in)
-* Outputs metadata of matchings (output image) to JSON.
+## GP-GAN
 
-get_distribution.py
-* Helper script that gets the distribution for a given domain using the directory- unnormalizes the YOLO labels and grabs the data. Has potential use case in csv_augmenter if you want to choose the number of objects placed on the canvas by percentile of the distribution for a given domains
+gp_gan_one_to_one.py- Takes in general augmented directory (subdirs by domain, holds canvases/masks/labels), destination directory (holds background images to place augmentations on), output_directory name, list of domains, and number of images to produce per domain combination. 
+
+For every combination of domains, the script creates a unique 
+
+src_dir = "/scratch/public/augmented_images/"
+dst_dir = "/scratch/public/jitter/wt/images/"
+#REPLACE/Background/
+results_dir = "/scratch/public/jitter/wt/images/Synthetic/"
+
+domains = ["EM", "NW", "SW"]
+
+n = 182
+
+run_one_to_one(src_dir, dst_dir, results_dir, domains, n)
