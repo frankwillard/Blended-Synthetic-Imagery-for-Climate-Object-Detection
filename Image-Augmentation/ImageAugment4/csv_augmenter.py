@@ -18,7 +18,7 @@ def multiple_replace(dict, text):
   # For each match, look-up corresponding value in dictionary
   return regex.sub(lambda mo: dict[mo.string[mo.start():mo.end()]], text) 
 
-def csv_augment(my_out_shape, domains, cropped, output_dir, num_outputs, metadata_json, num_to_sample_percentile, num_to_sample_constant):
+def csv_augment(my_out_shape, domains, cropped, output_dir, num_outputs, metadata_json, num_to_sample_percentile, num_to_sample_constant, offset_ctr, gp_gan_blend_offset):
 
   replacer = {
     "images":"labels",
@@ -68,7 +68,7 @@ def csv_augment(my_out_shape, domains, cropped, output_dir, num_outputs, metadat
       print(my_out_fname)
 
       #Can pass in all sources and all relatives
-      turbines = image_augmenter(cropped_imgs, domain, my_out_shape,cropped_labels, my_res_folder,my_out_fname, i, num_to_sample)
+      turbines = image_augmenter(cropped_imgs, domain, my_out_shape,cropped_labels, my_res_folder,my_out_fname, i, num_to_sample, offset_ctr, gp_gan_blend_offset)
 
       output_dict[domain][my_out_fname] = turbines
 
@@ -88,6 +88,10 @@ if __name__ == "__main__":
   parser.add_argument('--metadata-json', type=str, default = None, help='File name of JSON to output metadata on matchings to')
   parser.add_argument('--num-to-sample-percentile', type=int, default = None, help='Number of crops to augment into new image (based on percentile of distribution for given domain)')
   parser.add_argument('--num-to-sample-constant', type=int, default = None, help='Number of crops to augment into new image (constant)')
+  
+  #Dont need to enter this
+  parser.add_argument('--offset-ctr', type=int, default = 20, help='How much to offset your crops from the border of image')
+  parser.add_argument('--gp-gan-blend-offset', type=int, default = 20, help='How much to offset your crops from the border of image')
   args = parser.parse_args()
 
 #cropped = "/scratch/public/new_cropped_turbines/"
@@ -104,5 +108,9 @@ num_outputs = args.num_outputs
 metadata_json = args.metadata_json
 num_to_sample_constant = args.num_to_sample_constant
 num_to_sample_percentile = args.num_to_sample_percentile
+offset_ctr = args.offset_ctr
+gp_gan_blend_offset = args.gp_gan_blend_offset
 
-csv_augment(my_out_shape = out_shape, domains = domains, cropped = cropped_dir, output_dir = output_dir, num_outputs = num_outputs, metadata_json = metadata_json, num_to_sample_constant = num_to_sample_constant, num_to_sample_percentile = num_to_sample_percentile)
+csv_augment(my_out_shape = out_shape, domains = domains, cropped = cropped_dir, output_dir = output_dir, num_outputs = num_outputs,
+ metadata_json = metadata_json, num_to_sample_constant = num_to_sample_constant,
+ num_to_sample_percentile = num_to_sample_percentile, offset_ctr = offset_ctr, gp_gan_blend_offset = gp_gan_blend_offset)

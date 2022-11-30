@@ -5,7 +5,7 @@ import random
 
 #{src}_{masknum}_{background_fname}
 
-def image_augmenter(cropped_turbines, domain, out_shape, relative, results_dir, out_fname, random_seed, num_to_sample):
+def image_augmenter(cropped_turbines, domain, out_shape, relative, results_dir, out_fname, random_seed, num_to_sample, offset_ctr, gp_gan_blend_offset):
   """[summary]
 
   Args:
@@ -61,8 +61,6 @@ def image_augmenter(cropped_turbines, domain, out_shape, relative, results_dir, 
     rel_width = rel_lst[3]
     rel_height = rel_lst[4]
 
-    #indexing could be wrong here
-    offset_ctr = 20
     loc_x = random.randint(offset_ctr, out_shape[0]-offset_ctr)
     loc_y = random.randint(offset_ctr, out_shape[1]-offset_ctr)
 
@@ -88,14 +86,14 @@ def image_augmenter(cropped_turbines, domain, out_shape, relative, results_dir, 
     my_corners = [int(loc_x-size_x_add), int(loc_x+size_x_add), int(loc_y-size_y_add), int(loc_y+size_y_add)]
 
     #my_pixel_vals = masked_pixels[int(loc_y-size_y_add)+5:int(loc_y+size_y_add)-5,int(loc_x-size_x_add)+5:int(loc_x+size_x_add)-5]
-    my_pixel_vals = masked_pixels[int(loc_y-size_y_add)-10:int(loc_y+size_y_add)+10,int(loc_x-size_x_add)-10:int(loc_x+size_x_add)+10]
+    my_pixel_vals = masked_pixels[int(loc_y-size_y_add)-gp_gan_blend_offset:int(loc_y+size_y_add)+gp_gan_blend_offset,int(loc_x-size_x_add)-gp_gan_blend_offset:int(loc_x+size_x_add)+gp_gan_blend_offset]
     
     if curr_rotation == 90 or curr_rotation == 270:
       #my_corners = [int(loc_x-size_y_add)+5, int(loc_x+size_y_add)-5, int(loc_y-size_x_add)+5, int(loc_y+size_x_add)-5]
       my_corners = [int(loc_x-size_y_add), int(loc_x+size_y_add), int(loc_y-size_x_add), int(loc_y+size_x_add)]
       
       #my_pixel_vals = masked_pixels[int(loc_y-size_x_add)+5:int(loc_y+size_x_add)-5,int(loc_x-size_y_add)+5:int(loc_x+size_y_add)-5]
-      my_pixel_vals = masked_pixels[int(loc_y-size_x_add)-10:int(loc_y+size_x_add)+10,int(loc_x-size_y_add)-10:int(loc_x+size_y_add)+10]
+      my_pixel_vals = masked_pixels[int(loc_y-size_x_add)-gp_gan_blend_offset:int(loc_y+size_x_add)+gp_gan_blend_offset,int(loc_x-size_y_add)-gp_gan_blend_offset:int(loc_x+size_y_add)+gp_gan_blend_offset]
 
 
     if not all((i <= 608 and i >= 0) for i in my_corners) or any(my_pixel_vals.flatten()):
@@ -134,19 +132,19 @@ def image_augmenter(cropped_turbines, domain, out_shape, relative, results_dir, 
       #rotates for mask as needed
       new_location = (int(loc_x - size_y_add), int(loc_y - size_x_add))
       canvas.paste(im=new_windmill,box=new_location)
-      masked_pixels[int(loc_y-size_x_add)+10:int(loc_y+size_x_add)-10,int(loc_x-size_y_add)+10:int(loc_x+size_y_add)-10] = True
+      masked_pixels[int(loc_y-size_x_add)+gp_gan_blend_offset:int(loc_y+size_x_add)-gp_gan_blend_offset,int(loc_x-size_y_add)+gp_gan_blend_offset:int(loc_x+size_y_add)-gp_gan_blend_offset] = True
       # Rotate bounding box
       # (x, (rot/180)(height-2y)+y)
       # (h, w)
       my_y_scalar = ((curr_rotation - 90)/ 180) * (1 - 2 * rel_y_ctr) + rel_y_ctr
       my_x_scalar = ((curr_rotation - 270) / -180) * (1 - 2 * rel_x_ctr) + rel_x_ctr
-      my_x_ctr = (new_location[0]+my_y_scalar * new_size[1]) / out_shape[1]
+      my_x_ctr = (new_location[0]+my_y_scalar * new_size[1]) / out_shape[0]
       my_y_ctr = (new_location[1]+my_x_scalar * new_size[0]) / out_shape[1]
       txt_f.write("{my_class} {x_ctr} {y_ctr} {width} {height}\n".format(my_class="0", x_ctr=my_x_ctr,y_ctr=my_y_ctr,width=my_height,height=my_width))
     else:
       #0 or 180
       canvas.paste(im=new_windmill,box=new_location)
-      masked_pixels[int(loc_y-size_y_add)+10:int(loc_y+size_y_add)-10,int(loc_x-size_x_add)+10:int(loc_x+size_x_add)-10] = True
+      masked_pixels[int(loc_y-size_y_add)+gp_gan_blend_offset:int(loc_y+size_y_add)-gp_gan_blend_offset,int(loc_x-size_x_add)+gp_gan_blend_offset:int(loc_x+size_x_add)-gp_gan_blend_offset] = True
       #Rotate bounding box
       # (((rot-90)/180)(width-2y)+y, x)
       # (w, h)
