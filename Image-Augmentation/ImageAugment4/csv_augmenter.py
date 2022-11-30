@@ -18,7 +18,7 @@ def multiple_replace(dict, text):
   # For each match, look-up corresponding value in dictionary
   return regex.sub(lambda mo: dict[mo.string[mo.start():mo.end()]], text) 
 
-def csv_augment(my_out_shape, domains, cropped, output_dir, num_outputs, metadata_json, num_to_sample_percentile, num_to_sample_constant, offset_ctr, gp_gan_blend_offset):
+def csv_augment(my_out_shape, domains, cropped, output_dir, num_outputs, metadata_json, num_to_sample_percentile, num_to_sample_constant, offset_ctr, gp_gan_blend_offset, real_dir):
 
   replacer = {
     "images":"labels",
@@ -41,11 +41,11 @@ def csv_augment(my_out_shape, domains, cropped, output_dir, num_outputs, metadat
     #Relative labels
     cropped_labels = [multiple_replace(replacer, src_img) for src_img in cropped_imgs]
 
-    #If use for real, would need to only use first 100 from domain file 
-    num_imgs, width_turbines, height_turbines = return_distribution(domain)
-
     if num_to_sample_percentile is not None:
+      #If use for real, would need to only use first 100 from domain file 
+      num_imgs, width_turbines, height_turbines = return_distribution(real_dir, domain, my_out_shape)
       sorted_imgs = sorted(height_turbines)
+
       num_to_sample = sorted_imgs[int(num_to_sample_percentile / 100) * len(sorted_imgs)]
     elif num_to_sample_constant is not None:
       num_to_sample = num_to_sample_constant
@@ -88,7 +88,8 @@ if __name__ == "__main__":
   parser.add_argument('--metadata-json', type=str, default = None, help='File name of JSON to output metadata on matchings to')
   parser.add_argument('--num-to-sample-percentile', type=int, default = None, help='Number of crops to augment into new image (based on percentile of distribution for given domain)')
   parser.add_argument('--num-to-sample-constant', type=int, default = None, help='Number of crops to augment into new image (constant)')
-  
+  parser.add_argument('--real-label-dir', type=str, default = None, required = False, help='Directory (no final slash) holding real labels to get distribution from (subdirs are domains)')
+
   #Dont need to enter this
   parser.add_argument('--offset-ctr', type=int, default = 20, help='How much to offset your crops from the border of image')
   parser.add_argument('--gp-gan-blend-offset', type=int, default = 20, help='How much to offset your crops from the border of image')
@@ -110,7 +111,8 @@ num_to_sample_constant = args.num_to_sample_constant
 num_to_sample_percentile = args.num_to_sample_percentile
 offset_ctr = args.offset_ctr
 gp_gan_blend_offset = args.gp_gan_blend_offset
+real_dir = args.real_label_dir
 
 csv_augment(my_out_shape = out_shape, domains = domains, cropped = cropped_dir, output_dir = output_dir, num_outputs = num_outputs,
  metadata_json = metadata_json, num_to_sample_constant = num_to_sample_constant,
- num_to_sample_percentile = num_to_sample_percentile, offset_ctr = offset_ctr, gp_gan_blend_offset = gp_gan_blend_offset)
+ num_to_sample_percentile = num_to_sample_percentile, offset_ctr = offset_ctr, gp_gan_blend_offset = gp_gan_blend_offset, real_dir = real_dir)

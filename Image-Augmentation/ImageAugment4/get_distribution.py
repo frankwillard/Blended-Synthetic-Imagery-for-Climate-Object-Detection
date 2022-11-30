@@ -1,11 +1,10 @@
 import glob
 
-def return_distribution(domain):
-    real_lbl_dir = f"/scratch/public/jitter/wt/labels/{domain}/Real/"
+def return_distribution(real_label_dir, domain, out_shape):
+    real_lbl_dir = f"{real_label_dir}/{domain}/"
     all_lbls = glob.glob(real_lbl_dir + "*.txt")
 
-    out_ht = 608
-    out_w = 608
+    out_ht, out_w = out_shape
 
     num_imgs = []
     width_turbines = []
