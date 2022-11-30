@@ -96,7 +96,7 @@ def image_augmenter(cropped_turbines, domain, out_shape, relative, results_dir, 
       my_pixel_vals = masked_pixels[int(loc_y-size_x_add)-gp_gan_blend_offset:int(loc_y+size_x_add)+gp_gan_blend_offset,int(loc_x-size_y_add)-gp_gan_blend_offset:int(loc_x+size_y_add)+gp_gan_blend_offset]
 
 
-    if not all((i <= 608 and i >= 0) for i in my_corners) or any(my_pixel_vals.flatten()):
+    if not all((i <= out_shape[0] and i >= 0) for i in my_corners) or any(my_pixel_vals.flatten()):
       #Try different rotation
       #if curr_rotation % 180 == 0:
       #  my_corners = [int(loc_x-size_y_add)+5, int(loc_x+size_y_add)-5, int(loc_y-size_x_add)+5, int(loc_y+size_x_add)-5]

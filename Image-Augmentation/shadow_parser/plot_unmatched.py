@@ -38,9 +38,9 @@ lbl_dir = "/scratch/public/jitter/wt/labels/EM/Real/"
 
 img_directory = "/scratch/public/images_for_shadow/EM/"
 
-all_images = glob.glob(img_directory + "*.jpg")
-
 output_dir = "/home/fcw/unmatched/"
+
+all_images = glob.glob(img_directory + "*.jpg")
 
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)

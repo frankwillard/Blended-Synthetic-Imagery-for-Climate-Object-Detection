@@ -80,7 +80,7 @@ def csv_augment(my_out_shape, domains, cropped, output_dir, num_outputs, metadat
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(description='Adds cropped images onto white canvas and creates GP-GAN masks and YOLO labels')
   parser.add_argument('--out-h', type=int, default=608, help='Height in output image shape')
-  parser.add_argument('--out-w', type=int, default=608, help='Width in output image shape')
+  #parser.add_argument('--out-w', type=int, default=608, help='Width in output image shape')
   parser.add_argument('--domains', action = 'append', default = [], required = True, help='Height in output image shape')
   parser.add_argument('--num-outputs', type=int, required = True, help='Number of augmented images to produce')
   parser.add_argument('--cropped-dir', type=str, required = True, help='Directory (do not include the final slash) for cropped images/labels - Has a subdir of images and a subdir of labels (whose subdirs are the domain names)')
@@ -101,7 +101,7 @@ if __name__ == "__main__":
 #my_out_shape = (608,608)
 
 #Check if (height, width) or (width, height)
-out_shape = (args.out_h, args.out_w)
+out_shape = (args.out_h, args.out_h)
 domains = args.domains
 cropped_dir = args.cropped_dir
 output_dir = args.out_dir
