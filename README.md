@@ -1,5 +1,9 @@
 # Blended-Synthetic-Imagery-for-Climate-Object-Detection
 
+Pipeline for the code from the paper [Closing the Domain Gap -- Blended Synthetic Imagery for Climate Object Detection (Papers Track)](https://www.climatechange.ai/papers/neurips2022/37)
+
+[Link to paper PDF](https://s3.us-east-1.amazonaws.com/climate-change-ai/papers/neurips2022/37/paper.pdf)
+
 General pipeline:
 * Collect dataset of images clustered by domain (including both Real Images and Background Images to have objects blended onto)
 * Optional: Create set of cropped objects for each domain (./Image-Augmentation/crop_shadows.py)
