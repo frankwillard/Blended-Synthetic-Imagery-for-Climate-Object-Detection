@@ -5,33 +5,36 @@ import random
 
 #{src}_{masknum}_{background_fname}
 
-def augment_image(cropped_turbines, out_shape, relative, results_dir, out_fname, random_seed, num_to_sample, offset_ctr, gp_gan_blend_offset,verbose=False):
+def augment_image(objects_to_implant_img_fpaths, out_shape, objects_to_implant_lbl_fpaths, augmented_images_results_dir, out_fname, random_seed, num_objects_to_sample_per_image, offset_ctr, gp_gan_blend_offset,verbose=False):
   """
   Augments the image by pasting turbine images onto a canvas.
 
   Parameters:
   ----------
-    -  cropped_turbines (list): A list of paths to cropped turbine images.
+    -  objects_to_implant_img_fpaths (list): A list of paths to objects to implant.
     -  out_shape (tuple): The desired shape (width, height) of the output image.
-    -  relative (list): A list of paths to files containing relative position and size information for the turbine images.
-    -  results_dir (str): The directory where the augmented images will be saved.
+    -  objects_to_implant_lbl_fpaths (list): A list of paths to files containing relative position and size information for the implanting objects.
+    -  augmented_images_results_dir (str): The directory where the augmented images will be saved.
     -  out_fname (str): The filename of the output image.
     -  random_seed (int): The random seed for reproducibility.
-    -  num_to_sample (int): The maximum number of turbine images to sample for augmentation.
+    -  num_objects_to_sample_per_image (int): The maximum number of turbine images to sample for augmentation.
     -  offset_ctr (int): The offset center used for random positioning of turbine images.
     -  gp_gan_blend_offset (int): The blend offset used for masking.
+    -  verbose (bool): Whether to print out information about the augmentation process.
 
   Returns:
   -------
-    -  list: A list of cropped turbine images used for augmentation.
+    -  fpath (str): The file path of the augmented image.
+    -  mask_fpath (str): The file path of the corresponding mask image.
+    -  list: A list of cropped objects used for augmentation.
   """
 
   #makes directories
-  canvas_dir = os.path.join(results_dir, "canvases/")
-  mask_dir = os.path.join(results_dir, "masks/")
-  label_dir = os.path.join(results_dir, "labels/")
+  canvas_dir = os.path.join(augmented_images_results_dir, "canvases/")
+  mask_dir = os.path.join(augmented_images_results_dir, "masks/")
+  label_dir = os.path.join(augmented_images_results_dir, "labels/")
 
-  if not os.path.exists(results_dir):
+  if not os.path.exists(augmented_images_results_dir):
     os.makedirs(canvas_dir)
     os.mkdir(mask_dir)
     os.mkdir(label_dir)
@@ -46,7 +49,7 @@ def augment_image(cropped_turbines, out_shape, relative, results_dir, out_fname,
   c = 0
   random.seed(random_seed)
 
-  ninetieth_percentile = num_to_sample
+  ninetieth_percentile = num_objects_to_sample_per_image
   turbines_used = []
 
   while imgs < ninetieth_percentile and c < 100:
@@ -54,10 +57,10 @@ def augment_image(cropped_turbines, out_shape, relative, results_dir, out_fname,
 
     #for j in range(len(location)):
     #8 sources
-    rand_turbine_index = random.randint(0, len(cropped_turbines)-1)
-    windmill = Image.open(cropped_turbines[rand_turbine_index])
+    rand_turbine_index = random.randint(0, len(objects_to_implant_img_fpaths)-1)
+    windmill = Image.open(objects_to_implant_img_fpaths[rand_turbine_index])
 
-    with open(relative[rand_turbine_index], "r") as f:
+    with open(objects_to_implant_lbl_fpaths[rand_turbine_index], "r") as f:
       rel_lst = [float(x) for x in f.read().split()]
 
     rel_class = rel_lst[0]
@@ -117,7 +120,7 @@ def augment_image(cropped_turbines, out_shape, relative, results_dir, out_fname,
     if curr_rotation == 360:
       curr_rotation = 0
     
-    turbines_used.append(cropped_turbines[rand_turbine_index])
+    turbines_used.append(objects_to_implant_img_fpaths[rand_turbine_index])
     
     new_windmill = windmill.copy()
     #new_windmill = new_windmill.resize(new_size)
@@ -174,4 +177,4 @@ def augment_image(cropped_turbines, out_shape, relative, results_dir, out_fname,
   mask_fpath = os.path.join(mask_dir, out_fname + ".png")
   mask.save(mask_fpath)
 
-  return turbines_used
+  return fpath, mask_fpath, turbines_used

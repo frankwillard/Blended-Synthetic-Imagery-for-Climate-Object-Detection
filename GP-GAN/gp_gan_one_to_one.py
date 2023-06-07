@@ -98,7 +98,7 @@ def run_one_to_one(gen_aug_dir, gen_dst_dir, results_dir, domains, n):
             #Copies txt file of mask to synthetic output
             
             copyfile(my_txt, blended_out.replace(".jpg",".txt"))
-            cmd = f"python run_gp_gan.py --src_image {my_src} --dst_image \"{my_dst}\" --mask_image {my_mask} --blended_image {my_mask}"
+            cmd = f"python run_gp_gan.py --src_image {my_src} --dst_image \"{my_dst}\" --mask_image {my_mask} --blended_image {blended_out}"
             print("Running command:")
             print(cmd)
             #os.system(cmd)
