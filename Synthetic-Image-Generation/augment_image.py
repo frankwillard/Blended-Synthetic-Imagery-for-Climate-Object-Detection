@@ -17,8 +17,8 @@ def augment_image(objects_to_implant_img_fpaths, out_shape, objects_to_implant_l
     -  augmented_images_results_dir (str): The directory where the augmented images will be saved.
     -  out_fname (str): The filename of the output image.
     -  random_seed (int): The random seed for reproducibility.
-    -  num_objects_to_sample_per_image (int): The maximum number of turbine images to sample for augmentation.
-    -  offset_ctr (int): The offset center used for random positioning of turbine images.
+    -  num_objects_to_sample_per_image (int): The maximum number of implantable object images to sample for augmentation.
+    -  offset_ctr (int): The offset center used for random positioning of implantable object images.
     -  gp_gan_blend_offset (int): The blend offset used for masking.
     -  verbose (bool): Whether to print out information about the augmentation process.
 
@@ -50,17 +50,17 @@ def augment_image(objects_to_implant_img_fpaths, out_shape, objects_to_implant_l
   random.seed(random_seed)
 
   ninetieth_percentile = num_objects_to_sample_per_image
-  turbines_used = []
+  objects_used = []
 
   while imgs < ninetieth_percentile and c < 100:
     c+=1
 
     #for j in range(len(location)):
     #8 sources
-    rand_turbine_index = random.randint(0, len(objects_to_implant_img_fpaths)-1)
-    windmill = Image.open(objects_to_implant_img_fpaths[rand_turbine_index])
+    rand_object_index = random.randint(0, len(objects_to_implant_img_fpaths)-1)
+    object_to_implant = Image.open(objects_to_implant_img_fpaths[rand_object_index])
 
-    with open(objects_to_implant_lbl_fpaths[rand_turbine_index], "r") as f:
+    with open(objects_to_implant_lbl_fpaths[rand_object_index], "r") as f:
       rel_lst = [float(x) for x in f.read().split()]
 
     rel_class = rel_lst[0]
@@ -80,13 +80,13 @@ def augment_image(objects_to_implant_img_fpaths, out_shape, objects_to_implant_l
 
     curr_rotation = random.randint(0,3)*90
 
-    #imwidth, imheight = windmill.size
+    #imwidth, imheight = object_to_implant.size
 
     #avg_ratio = ((size_x/imwidth) + (size_y /imheight)) / 2
     #avg_ratio = ((size_x/(rel_width*imwidth)) + (size_y /(rel_height * imheight))) / 2
     #new_size = (int(imwidth * avg_ratio), int(imheight*avg_ratio))
 
-    new_size = windmill.size
+    new_size = object_to_implant.size
     size_x_add = new_size[0]/2
     size_y_add = new_size[1]/2
 
@@ -120,11 +120,11 @@ def augment_image(objects_to_implant_img_fpaths, out_shape, objects_to_implant_l
     if curr_rotation == 360:
       curr_rotation = 0
     
-    turbines_used.append(objects_to_implant_img_fpaths[rand_turbine_index])
+    objects_used.append(objects_to_implant_img_fpaths[rand_object_index])
     
-    new_windmill = windmill.copy()
-    #new_windmill = new_windmill.resize(new_size)
-    new_windmill = new_windmill.rotate(curr_rotation,expand=True,fillcolor=(255,255,255))
+    new_object_to_implant = object_to_implant.copy()
+    #new_object_to_implant = new_object_to_implant.resize(new_size)
+    new_object_to_implant = new_object_to_implant.rotate(curr_rotation,expand=True,fillcolor=(255,255,255))
 
     new_location = (int(loc_x - size_x_add), int(loc_y - size_y_add))
 
@@ -139,7 +139,7 @@ def augment_image(objects_to_implant_img_fpaths, out_shape, objects_to_implant_l
     if curr_rotation == 90 or curr_rotation == 270:
       #rotates for mask as needed
       new_location = (int(loc_x - size_y_add), int(loc_y - size_x_add))
-      canvas.paste(im=new_windmill,box=new_location)
+      canvas.paste(im=new_object_to_implant,box=new_location)
       masked_pixels[int(loc_y-size_x_add)+gp_gan_blend_offset:int(loc_y+size_x_add)-gp_gan_blend_offset,int(loc_x-size_y_add)+gp_gan_blend_offset:int(loc_x+size_y_add)-gp_gan_blend_offset] = True
       # Rotate bounding box
       # (x, (rot/180)(height-2y)+y)
@@ -151,7 +151,7 @@ def augment_image(objects_to_implant_img_fpaths, out_shape, objects_to_implant_l
       txt_f.write("{my_class} {x_ctr} {y_ctr} {width} {height}\n".format(my_class="0", x_ctr=my_x_ctr,y_ctr=my_y_ctr,width=my_height,height=my_width))
     else:
       #0 or 180
-      canvas.paste(im=new_windmill,box=new_location)
+      canvas.paste(im=new_object_to_implant,box=new_location)
       masked_pixels[int(loc_y-size_y_add)+gp_gan_blend_offset:int(loc_y+size_y_add)-gp_gan_blend_offset,int(loc_x-size_x_add)+gp_gan_blend_offset:int(loc_x+size_x_add)-gp_gan_blend_offset] = True
       #Rotate bounding box
       # (((rot-90)/180)(width-2y)+y, x)
@@ -177,4 +177,4 @@ def augment_image(objects_to_implant_img_fpaths, out_shape, objects_to_implant_l
   mask_fpath = os.path.join(mask_dir, out_fname + ".png")
   mask.save(mask_fpath)
 
-  return fpath, mask_fpath, turbines_used
+  return fpath, mask_fpath, objects_used
