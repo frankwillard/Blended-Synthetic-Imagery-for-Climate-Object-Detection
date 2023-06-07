@@ -30,8 +30,6 @@ def generate_synthetic_dataset(implantable_objects_dir, out_shape, augmented_ima
 
     file_types = ("*.jpg", "*.png")
     
-    random.seed(42)
-
     metadata_dict = {}
 
     if num_objects_to_sample_per_image_constant is not None:
