@@ -9,17 +9,34 @@ from helpers import multiple_replace, createPath, iterative_sample_without_repla
 from get_distribution import return_distribution
 
 def generate_synthetic_dataset(implantable_objects_dir, out_shape, augmented_images_results_dir, random_seed, num_objects_to_sample_per_image_percentile, num_objects_to_sample_per_image_constant,
-                               offset_ctr, gp_gan_blend_offset, real_label_dir, background_images_dir, final_results_dir, gp_gan_dir, domains, num_synthetic_images_per_domain, generate_unique_src_augmentations,
-                               verbose=False):
-    """[summary]
+                               offset_ctr, gp_gan_blend_offset, real_label_dir, background_images_dir, final_results_dir, gp_gan_dir, domains, num_synthetic_images_per_domain, objects_augmenter_has_access_to,
+                               generate_unique_src_augmentations, verbose=False):
+    """
+    Generate a synthetic image dataset by placing random objects and blending them with background images using GP-GAN.
 
-    Args:
-        src_dir ([type]): [description]
-        dst_dir ([type]): [description]
-        store_dir ([type]): [description]
-        results_dir ([type]): [description]
-        domains ([type]): [description]
-        n ([type]): [description]
+    Parameters:
+    ----------
+        implantable_objects_dir (str): Directory holding the image paths for the objects to be implanted.
+        out_shape (tuple): The desired shape (width, height) of the output image.
+        augmented_images_results_dir (str): The directory where the augmented images (canvas/masks) will be saved.
+        random_seed (int): The random seed for reproducibility.
+        num_objects_to_sample_per_image_percentile (int): Number of crops to augment into a new image (based on percentile of distribution for the given domain).
+        num_objects_to_sample_per_image_constant (int): Number of crops to augment into a new image (constant).
+        offset_ctr (int): The offset center used for random positioning of turbine images.
+        gp_gan_blend_offset (int): The blend offset used for masking.
+        real_label_dir (str): Directory holding real labels to get distribution from (subdirs are domains).
+        background_images_dir (str): Directory for background images (subdir of domain, subdir of Background).
+        final_results_dir (str): Directory for output_images (subdir of s-src-t-target per domain combination).
+        gp_gan_dir (str): Directory including the GP-GAN code.
+        domains (list): Domains in the dataset.
+        num_synthetic_images_per_domain (int): Number of augmented images to produce.
+        objects_augmenter_has_access_to (int): Number of implanted objects to be able to sample from (will be randomly sampled from the directory).
+        generate_unique_src_augmentations (bool): Generate unique source augmentations for each target domain.
+        verbose (bool): Print out progress of augmentation.
+        
+    Returns:
+    ----------
+        metadata_dict (dict): A dictionary containing the metadata for the generated synthetic images.
     """
 
     replacer = {
@@ -43,8 +60,13 @@ def generate_synthetic_dataset(implantable_objects_dir, out_shape, augmented_ima
 
         # Cropped images
         objects_to_implant_img_fpaths = []
+        implantable_objects_file_paths = []
         for file_type in file_types:
-            objects_to_implant_img_fpaths.extend(glob.glob(src_img_dir + file_type))
+            implantable_objects_file_paths.extend(glob.glob(src_img_dir + file_type))
+        
+        assert objects_augmenter_has_access_to > len(implantable_objects_file_paths)
+
+        objects_to_implant_img_fpaths = random.sample(implantable_objects_file_paths, objects_augmenter_has_access_to)
 
         # Labels in exact same order as images
         objects_to_implant_lbl_fpaths = [multiple_replace(replacer, src_img) for src_img in objects_to_implant_img_fpaths]
@@ -89,7 +111,7 @@ def generate_synthetic_dataset(implantable_objects_dir, out_shape, augmented_ima
                 random_seed = random_seed + total_imgs_count 
 
                 generate_synthetic_image(objects_to_implant_img_fpaths, out_shape, objects_to_implant_lbl_fpaths, augmented_images_results_dir, out_fname, random_seed, num_objects_to_sample_per_image,
-                                         offset_ctr, gp_gan_blend_offset, dst_img, blended_img_out_path, generate_src_augmentations, verbose)
+                                         offset_ctr, gp_gan_blend_offset, gp_gan_dir, dst_img, blended_img_out_path, generate_src_augmentations, verbose)
                 
                 total_imgs_count += 1
     
@@ -148,6 +170,7 @@ if __name__ == "__main__":
                         help='Domains in dataset'
     )
     parser.add_argument('--num-synthetic-images-per-domain', type=int, required=True, help='Number of augmented images to produce')
+    parser.add_argument('--objects-augmenter-has-access-to', type=int, required=True, help='Number of implanted objects to be able to sample from (will be randomly sampled from directory)')
     parser.add_argument('--generate-unique-src-augmentations', action='store_true', help='Generate unique source augmentations for each target domain')
     parser.add_argument('--verbose', action='store_true', help='Print out progress of augmentation')
 
@@ -175,6 +198,7 @@ if __name__ == "__main__":
     # Dataset arguments
     domains = args.domains
     num_synthetic_images_per_domain = args.num_synthetic_images_per_domain
+    objects_augmenter_has_access_to = args.objects_augmenter_has_access_to
     generate_unique_src_augmentations = args.generate_unique_src_augmentations
     verbose = args.verbose
 

@@ -18,6 +18,7 @@ gp_gan_dir = "/home/fcw/Blended-Synthetic-Imagery-for-Climate-Object-Detection/G
 # Dataset arguments
 domains = "EM NW SW"
 num_synthetic_images_per_domain = 5
+objects_to_have_access_to = 100
 # generate_unique_src_augmentations = True
 # verbose = True
 
