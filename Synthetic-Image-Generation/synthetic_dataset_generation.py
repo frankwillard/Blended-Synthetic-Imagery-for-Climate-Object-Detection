@@ -9,7 +9,7 @@ from helpers import multiple_replace, createPath, iterative_sample_without_repla
 from get_distribution import return_distribution
 
 def generate_synthetic_dataset(implantable_objects_dir, out_shape, augmented_images_results_dir, random_seed, num_objects_to_sample_per_image_percentile, num_objects_to_sample_per_image_constant,
-                               offset_ctr, gp_gan_blend_offset, real_label_dir, background_images_dir, final_results_dir, domains, num_synthetic_images_per_domain, generate_unique_src_augmentations,
+                               offset_ctr, gp_gan_blend_offset, real_label_dir, background_images_dir, final_results_dir, gp_gan_dir, domains, num_synthetic_images_per_domain, generate_unique_src_augmentations,
                                verbose=False):
     """[summary]
 
@@ -132,6 +132,7 @@ if __name__ == "__main__":
     # GP-GAN arguments
     parser.add_argument('--background-images-dir', type=str, required=True, help='Directory (do not include the final slash) for backgrounds (subdir of domain, subdir of Background)')
     parser.add_argument('--final-results-dir', type=str, required=True, help='Directory (do not include the final slash) for output_images (subdir of s-src-t-target per domain combination)')
+    parser.add_argument('--gp-gan-dir', type=str, required=True, help='Directory including the GP-GAN code')
 
     # Dataset arguments
     parser.add_argument('--domains',
@@ -162,6 +163,7 @@ if __name__ == "__main__":
     # GP-GAN arguments
     background_images_dir = args.background_images_dir
     final_results_dir = args.final_results_dir
+    gp_gan_dir = args.gp_gan_dir
 
     # Dataset arguments
     domains = args.domains
@@ -170,5 +172,5 @@ if __name__ == "__main__":
     verbose = args.verbose
 
     generate_synthetic_dataset(implantable_objects_dir, out_shape, augmented_images_results_dir, random_seed, num_objects_to_sample_per_image_percentile, num_objects_to_sample_per_image_constant,
-                               offset_ctr, gp_gan_blend_offset, real_label_dir, background_images_dir, final_results_dir, domains, num_synthetic_images_per_domain, generate_unique_src_augmentations,
+                               offset_ctr, gp_gan_blend_offset, real_label_dir, background_images_dir, final_results_dir, gp_gan_dir, domains, num_synthetic_images_per_domain, generate_unique_src_augmentations,
                                verbose)

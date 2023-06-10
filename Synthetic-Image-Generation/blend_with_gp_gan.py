@@ -2,7 +2,7 @@ import subprocess
 import argparse
 import os
 
-def blend_with_gp_gan(src_img, dst_img, mask_img, blended_img_out_path, verbose=False):
+def blend_with_gp_gan(gp_gan_dir, src_img, dst_img, mask_img, blended_img_out_path, verbose=False):
     """
     Blend the source image with the destination image using the mask image
     and save the blended image to the specified output path using GP-GAN.
@@ -33,7 +33,7 @@ def blend_with_gp_gan(src_img, dst_img, mask_img, blended_img_out_path, verbose=
         blend_with_gp_gan('source.jpg', 'destination.jpg', 'mask.png', 'blended.jpg', verbose=True)
     """
     #Copies txt file of mask to synthetic output
-    cmd = f"python3 run_gp_gan.py --src_image {src_img} --dst_image \"{dst_img}\" --mask_image {mask_img} --blended_image {blended_img_out_path}"
+    cmd = f"python3 {gp_gan_dir}/run_gp_gan.py --src_image {src_img} --dst_image \"{dst_img}\" --mask_image {mask_img} --blended_image {blended_img_out_path}"
     
     if verbose:
         print("Running command:")
@@ -45,6 +45,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Creates a synthetic image by placing random objects and blending them with background images blending images through the GP-GAN')
 
     # GP-GAN arguments
+    parser.add_argument('--gp-gan-dir', type=str, required=True, help='Directory including the GP-GAN code')
     parser.add_argument('--src-img', type=str, required = True, help='File path for source image to blend into destination image')
     parser.add_argument('--dst-img', type=str, required = True, help='File path of destination image to blend source image into')
     parser.add_argument('--mask-img', type=str, required = True, help='File path of mask image with information as to where to blend source image into destination image')
@@ -52,6 +53,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # GP-GAN arguments
+    gp_gan_dir = args.gp_gan_dir
     src_dir = args.src_dir
     dst_dir = args.dst_dir
     mask_img = args.mask_img
