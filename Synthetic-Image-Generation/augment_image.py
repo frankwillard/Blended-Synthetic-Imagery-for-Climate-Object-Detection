@@ -42,18 +42,17 @@ def augment_image(objects_to_implant_img_fpaths, out_shape, objects_to_implant_l
   masked_pixels = np.zeros(out_shape,dtype=bool)
   canvas = Image.new(mode='RGB', size=out_shape,color=(255,255,255))
 
-  txt_fname = os.path.join(label_dir, out_fname + ".txt")
-  txt_f = open(txt_fname, "w")
+  yolo_txt_fname = os.path.join(label_dir, out_fname + ".txt")
+  yolo_txt_file_to_write = open(yolo_txt_fname, "w")
 
-  imgs = 0
-  c = 0
+  imgs_implanted = 0
+  implant_attempt_counter = 0 # Prevent infinite loop
   random.seed(random_seed)
 
-  ninetieth_percentile = num_objects_to_sample_per_image
   objects_used = []
 
-  while imgs < ninetieth_percentile and c < 100:
-    c+=1
+  while imgs_implanted < num_objects_to_sample_per_image and implant_attempt_counter < 100:
+    implant_attempt_counter +=1
 
     #for j in range(len(location)):
     #8 sources
@@ -133,7 +132,7 @@ def augment_image(objects_to_implant_img_fpaths, out_shape, objects_to_implant_l
     my_width = (rel_width * new_size[0]) / out_shape[1]
     my_height = (rel_height * new_size[1]) / out_shape[0]
 
-    imgs +=1
+    imgs_implanted +=1
 
     ###MAIN EDITS for rotate bounding box
     if curr_rotation == 90 or curr_rotation == 270:
@@ -148,7 +147,7 @@ def augment_image(objects_to_implant_img_fpaths, out_shape, objects_to_implant_l
       my_x_scalar = ((curr_rotation - 270) / -180) * (1 - 2 * rel_x_ctr) + rel_x_ctr
       my_x_ctr = (new_location[0]+my_y_scalar * new_size[1]) / out_shape[0]
       my_y_ctr = (new_location[1]+my_x_scalar * new_size[0]) / out_shape[1]
-      txt_f.write("{my_class} {x_ctr} {y_ctr} {width} {height}\n".format(my_class="0", x_ctr=my_x_ctr,y_ctr=my_y_ctr,width=my_height,height=my_width))
+      yolo_txt_file_to_write.write("{my_class} {x_ctr} {y_ctr} {width} {height}\n".format(my_class="0", x_ctr=my_x_ctr,y_ctr=my_y_ctr,width=my_height,height=my_width))
     else:
       #0 or 180
       canvas.paste(im=new_object_to_implant,box=new_location)
@@ -160,7 +159,7 @@ def augment_image(objects_to_implant_img_fpaths, out_shape, objects_to_implant_l
       my_x_scalar = ((curr_rotation)/ 180) * (1 - 2 * rel_x_ctr) + rel_x_ctr
       my_x_ctr = (new_location[0]+my_x_scalar * new_size[0]) / out_shape[1]
       my_y_ctr = (new_location[1]+my_y_scalar * new_size[1]) / out_shape[0]
-      txt_f.write("{my_class} {x_ctr} {y_ctr} {width} {height}\n".format(my_class="0", x_ctr=my_x_ctr,y_ctr=my_y_ctr,width=my_width,height=my_height))
+      yolo_txt_file_to_write.write("{my_class} {x_ctr} {y_ctr} {width} {height}\n".format(my_class="0", x_ctr=my_x_ctr,y_ctr=my_y_ctr,width=my_width,height=my_height))
   
   masked_pixels = np.stack((masked_pixels, masked_pixels, masked_pixels), axis=2)
   mask = Image.fromarray((masked_pixels*255).astype(np.uint8))
@@ -170,7 +169,7 @@ def augment_image(objects_to_implant_img_fpaths, out_shape, objects_to_implant_l
   #display(mask)
   #display(canvas)
 
-  txt_f.close()
+  yolo_txt_file_to_write.close()
 
   fpath = os.path.join(canvas_dir, out_fname + ".jpg")
   canvas.save(fpath)
