@@ -47,6 +47,9 @@ def iterative_sample_without_replacement(population, n):
     Returns:
         list: A list of sampled elements from the population without replacement.
     """
+
+    print(f"Sampling without replacement {len(population)} {n}")
+
     sampled_list = []
 
     # If n <= len(population), sample without replacement

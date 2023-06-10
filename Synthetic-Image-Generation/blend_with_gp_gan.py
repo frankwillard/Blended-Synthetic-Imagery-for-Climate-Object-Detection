@@ -33,7 +33,7 @@ def blend_with_gp_gan(src_img, dst_img, mask_img, blended_img_out_path, verbose=
         blend_with_gp_gan('source.jpg', 'destination.jpg', 'mask.png', 'blended.jpg', verbose=True)
     """
     #Copies txt file of mask to synthetic output
-    cmd = f"python run_gp_gan.py --src_image {src_img} --dst_image \"{dst_img}\" --mask_image {mask_img} --blended_image {blended_img_out_path}"
+    cmd = f"python3 run_gp_gan.py --src_image {src_img} --dst_image \"{dst_img}\" --mask_image {mask_img} --blended_image {blended_img_out_path}"
     
     if verbose:
         print("Running command:")

@@ -55,13 +55,18 @@ def generate_synthetic_dataset(implantable_objects_dir, out_shape, augmented_ima
             num_objects_to_sample_per_image = sorted_turbine_heights[int(num_objects_to_sample_per_image_percentile / 100) * len(sorted_turbine_heights)]
 
         for j, target_domain in enumerate(domains):
+            
+            print(src_domain, target_domain)
+
             dict_name = f"s_{src_domain}_t_{target_domain}"
             current_subdir = f"{final_results_dir}/{dict_name}/"
             createPath(current_subdir)
 
             dest_dir = f"{background_images_dir}/{target_domain}/Background/"
             all_dsts = glob.glob(dest_dir + "*.jpg")
-            dst_imgs = iterative_sample_without_replacement(all_dsts, n)
+
+            # Randomly sample n images from all_dsts
+            dst_imgs = iterative_sample_without_replacement(all_dsts, num_synthetic_images_per_domain)
 
             metadata_dict[dict_name] = []
 
@@ -71,7 +76,8 @@ def generate_synthetic_dataset(implantable_objects_dir, out_shape, augmented_ima
                     print(out_fname)
 
                 # Determine whether to generate augmentations for src_domain
-                generate_src_augmentations = j == 0 and not generate_unique_src_augmentations
+                generate_src_augmentations = j == 0 or generate_unique_src_augmentations
+
                 dst_img = dst_imgs[i]
 
                 dst_address = os.path.splitext(os.path.basename(dst_img))[0]
@@ -85,40 +91,38 @@ def generate_synthetic_dataset(implantable_objects_dir, out_shape, augmented_ima
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Creates a synthetic image dataset by placing random objects and blending them with background images blending images through the GP-GAN')
     parser.add_argument(
-        "implantable-objects-dir",
+        "--implantable-objects-dir",
         type=str,
-        required=True,
         help="A directory holding the image paths for the objects to be implanted."
     )
     parser.add_argument(
-        "out-shape",
+        "--out-shape",
         type=int,
         nargs="+",
         default=[608, 608],
         help="The desired shape (width, height) of the output image."
     )
     parser.add_argument(
-        "augmented-images-results-dir",
+        "--augmented-images-results-dir",
         type=str,
-        required=True,
         help="The directory where the augmented images (canvas/masks) will be saved."
     )
     parser.add_argument(
-        "random-seed",
+        "--random-seed",
         type=int,
         default=42,
         help="The random seed for reproducibility."
     )
-    parser.add_argument('--num-to-sample-percentile', type=int, default=None, help='Number of crops to augment into new image (based on percentile of distribution for given domain)')
-    parser.add_argument('--num-to-sample-constant', type=int, default=None, help='Number of crops to augment into new image (constant)')
+    parser.add_argument('--num-objects-to-sample-per-image-percentile', type=int, default=None, help='Number of crops to augment into new image (based on percentile of distribution for given domain)')
+    parser.add_argument('--num-objects-to-sample-per-image-constant', type=int, default=None, help='Number of crops to augment into new image (constant)')
     parser.add_argument(
-        "offset-ctr",
+        "--offset-ctr",
         type=int,
         default=20,
         help="The offset center used for random positioning of turbine images."
     )
     parser.add_argument(
-        "gp-gan-blend-offset",
+        "--gp-gan-blend-offset",
         type=int,
         default=20,
         help="The blend offset used for masking."
@@ -133,7 +137,6 @@ if __name__ == "__main__":
     parser.add_argument('--domains',
                         type=str,
                         nargs="+",
-                        required=True,
                         help='Domains in dataset'
     )
     parser.add_argument('--num-synthetic-images-per-domain', type=int, required=True, help='Number of augmented images to produce')
@@ -142,9 +145,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    assert args.num_objects_to_sample_per_image_percentile or args.num_objects_to_sample_per_image_constant, "Must use either percentile or constant for number of crops to augment into new image"
     assert not (args.num_objects_to_sample_per_image_percentile and args.num_objects_to_sample_per_image_constant), "Cannot use both percentile and constant for number of crops to augment into new image"
-    assert args.num_objects_to_sample_per_image_percentile and args.real_label_dir, "Must use real label dir to get distribution from if using percentile for number of crops to augment into new image"
+    assert args.num_objects_to_sample_per_image_constant or (args.num_objects_to_sample_per_image_percentile and args.real_label_dir), "Must use either percentile or constant for number of crops to augment into new image. Must use real label dir to get distribution from if using percentile for number of crops to augment into new image"
 
     # Augment image arguments
     implantable_objects_dir = args.implantable_objects_dir
