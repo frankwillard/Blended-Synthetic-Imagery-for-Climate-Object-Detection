@@ -13,7 +13,8 @@ random_seed = 42
 background_images_dir = "/scratch/cek28/jitter/wt/images/"
 final_results_dir = "/home/fcw/Synthetic-Images-Test/Synthetic-Imagery/"
 gp_gan_dir = "/home/fcw/Blended-Synthetic-Imagery-for-Climate-Object-Detection/Synthetic-Image-Generation/GP-GAN/"
-g_path = "/scratch/cek28/jitter/wt/models/blending_gan.npz"
+# g_path = "/scratch/cek28/jitter/wt/models/blending_gan.npz"
+g_path = "/home/fcw/blending_gan.npz"
 
 # Dataset arguments
 domains = "EM NW SW"

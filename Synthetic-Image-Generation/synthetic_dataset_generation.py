@@ -5,7 +5,7 @@ import random
 import json
 import argparse
 from generate_synthetic_image import generate_synthetic_image
-from helpers import multiple_replace, createPath, iterative_sample_without_replacement
+from helpers import multiple_replace, createPath, iterative_sample_without_replacement, move_synthetic_files_to_domain_pair_subdirectories
 from get_distribution import return_distribution
 from augment_image import augment_image
 from blend_with_gp_gan import blend_with_gp_gan
@@ -134,11 +134,9 @@ def generate_synthetic_dataset(implantable_objects_dir, out_shape, augmented_ima
     list_path_csv.close()
 
     if generate_all_augmentations_first:
-        for src_domain in domains:
-            for target_domain in domains:
-                current_subdir = f"{final_results_dir}/s_{src_domain}_t_{target_domain}/"
-                blend_with_gp_gan(gp_gan_dir, g_path, src_img = None, dst_img = None, mask_img = None, blended_img_out_path = None, results_folder = current_subdir, list_path = list_path_csv_fname, verbose=verbose)
-    
+        blend_with_gp_gan(gp_gan_dir, g_path, src_img = None, dst_img = None, mask_img = None, blended_img_out_path = None, results_folder = final_results_dir, list_path = list_path_csv_fname, verbose=verbose)
+        move_synthetic_files_to_domain_pair_subdirectories(final_results_dir, verbose=verbose)
+        
     return metadata_dict
 
 if __name__ == "__main__":

@@ -1,6 +1,8 @@
 import re
 import os
 import random
+import glob
+import shutil
 
 def multiple_replace(dict, text):
   """
@@ -66,3 +68,29 @@ def iterative_sample_without_replacement(population, n):
             remaining_samples -= len(population)
 
     return sampled_list
+
+def move_synthetic_files_to_domain_pair_subdirectories(directory, verbose=False):
+    """
+    Move files in the given directory into corresponding subdirectories based on file names.
+
+    Args:
+        directory (str): Path to the directory containing the files.
+
+    Returns:
+        None
+    """
+
+    # file_pattern = os.path.join(directory, 'obj_src_*_mask*_bg_*_mask_*.png')
+    file_pattern = os.path.join(directory, '*.png')
+    file_paths = glob.glob(file_pattern)
+
+    for file_path in file_paths:
+        filename = os.path.basename(file_path)
+        src_domain = filename.split('_')[2]
+        target_domain = filename.split('_')[5]
+        subdirectory = f"s_{src_domain}_t_{target_domain}"
+        destination_dir = os.path.join(directory, subdirectory)
+
+        shutil.move(file_path, destination_dir)
+        if verbose:
+            print("Moved " + file_path + " to " + destination_dir)
