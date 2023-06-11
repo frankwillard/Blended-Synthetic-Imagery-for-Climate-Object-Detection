@@ -106,7 +106,7 @@ def generate_synthetic_dataset(implantable_objects_dir, out_shape, augmented_ima
             metadata_dict[dict_name] = []
 
             for i in range(num_synthetic_images_per_domain):
-                out_fname  = f"src_{src_domain}_mask{i}"
+                out_fname  = f"src_{src_domain}_dst_{target_domain}_mask{i}"
                 if verbose:
                     print(out_fname)
 

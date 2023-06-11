@@ -114,7 +114,8 @@ def augment_image(objects_to_implant_img_fpaths, out_shape, objects_to_implant_l
       #curr_rotation += 90
       #if not all((i <= 608 and i >= 0) for i in my_corners) or any(my_pixel_vals.flatten()):
       
-      print("OVERLAP")
+      if verbose:
+        print("OVERLAP")
       continue
 
     if curr_rotation == 360:
