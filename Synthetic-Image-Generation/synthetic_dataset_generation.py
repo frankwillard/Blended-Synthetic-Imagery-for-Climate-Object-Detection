@@ -11,7 +11,7 @@ from augment_image import augment_image
 from blend_with_gp_gan import blend_with_gp_gan
 
 def generate_synthetic_dataset(implantable_objects_dir, out_shape, augmented_images_results_dir, random_seed, num_objects_to_sample_per_image_percentile, num_objects_to_sample_per_image_constant,
-                               offset_ctr, gp_gan_blend_offset, real_label_dir, background_images_dir, final_results_dir, gp_gan_dir, domains, num_synthetic_images_per_domain, objects_augmenter_has_access_to,
+                               offset_ctr, gp_gan_blend_offset, real_label_dir, background_images_dir, final_results_dir, gp_gan_dir, g_path, domains, num_synthetic_images_per_domain, objects_augmenter_has_access_to,
                                generate_unique_src_augmentations, generate_all_augmentations_first, experiment_name, verbose=False):
     """
     Generate a synthetic image dataset by placing random objects and blending them with background images using GP-GAN.
@@ -30,6 +30,7 @@ def generate_synthetic_dataset(implantable_objects_dir, out_shape, augmented_ima
         background_images_dir (str): Directory for background images (subdir of domain, subdir of Background).
         final_results_dir (str): Directory for output_images (subdir of s-src-t-target per domain combination).
         gp_gan_dir (str): Directory including the GP-GAN code.
+        g_path (str): Path to the pretrained blending GP-GAN model.
         domains (list): Domains in the dataset.
         num_synthetic_images_per_domain (int): Number of augmented images to produce.
         objects_augmenter_has_access_to (int): Number of implanted objects to be able to sample from (will be randomly sampled from the directory).
@@ -122,7 +123,7 @@ def generate_synthetic_dataset(implantable_objects_dir, out_shape, augmented_ima
                 
                 if not generate_all_augmentations_first:
                     generate_synthetic_image(objects_to_implant_img_fpaths, out_shape, objects_to_implant_lbl_fpaths, augmented_images_results_dir, out_fname, random_seed, num_objects_to_sample_per_image,
-                                             offset_ctr, gp_gan_blend_offset, gp_gan_dir, dst_img, blended_img_out_path, generate_src_augmentations, verbose)
+                                             offset_ctr, gp_gan_blend_offset, gp_gan_dir, g_path, dst_img, blended_img_out_path, generate_src_augmentations, verbose)
                 else:
                     src_img_fpath, mask_img_fpath, turbines_used = augment_image(objects_to_implant_img_fpaths, out_shape, objects_to_implant_lbl_fpaths, augmented_images_results_dir, out_fname, random_seed,
                                                                     num_objects_to_sample_per_image, offset_ctr, gp_gan_blend_offset)
@@ -136,7 +137,7 @@ def generate_synthetic_dataset(implantable_objects_dir, out_shape, augmented_ima
         for src_domain in domains:
             for target_domain in domains:
                 current_subdir = f"{final_results_dir}/s_{src_domain}_t_{target_domain}/"
-                blend_with_gp_gan(gp_gan_dir, src_img = None, dst_img = None, mask_img = None, blended_img_out_path = None, results_folder = current_subdir, list_path = list_path_csv_fname, verbose=verbose)
+                blend_with_gp_gan(gp_gan_dir, g_path, src_img = None, dst_img = None, mask_img = None, blended_img_out_path = None, results_folder = current_subdir, list_path = list_path_csv_fname, verbose=verbose)
     
     return metadata_dict
 
@@ -185,6 +186,7 @@ if __name__ == "__main__":
     parser.add_argument('--background-images-dir', type=str, required=True, help='Directory (do not include the final slash) for backgrounds (subdir of domain, subdir of Background)')
     parser.add_argument('--final-results-dir', type=str, required=True, help='Directory (do not include the final slash) for output_images (subdir of s-src-t-target per domain combination)')
     parser.add_argument('--gp-gan-dir', type=str, required=True, help='Directory including the GP-GAN code')
+    parser.add_argument('--g-path', help='Path for pretrained Blending GAN model')
 
     # Dataset arguments
     parser.add_argument('--domains',
@@ -219,6 +221,7 @@ if __name__ == "__main__":
     background_images_dir = args.background_images_dir
     final_results_dir = args.final_results_dir
     gp_gan_dir = args.gp_gan_dir
+    g_path = args.g_path
 
     # Dataset arguments
     domains = args.domains
@@ -230,5 +233,5 @@ if __name__ == "__main__":
     verbose = args.verbose
 
     generate_synthetic_dataset(implantable_objects_dir, out_shape, augmented_images_results_dir, random_seed, num_objects_to_sample_per_image_percentile, num_objects_to_sample_per_image_constant,
-                               offset_ctr, gp_gan_blend_offset, real_label_dir, background_images_dir, final_results_dir, gp_gan_dir, domains, num_synthetic_images_per_domain, 
+                               offset_ctr, gp_gan_blend_offset, real_label_dir, background_images_dir, final_results_dir, gp_gan_dir, g_path, domains, num_synthetic_images_per_domain, 
                                objects_augmenter_has_access_to, generate_unique_src_augmentations, generate_all_augmentations_first, experiment_name, verbose)

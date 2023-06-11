@@ -13,6 +13,7 @@ random_seed = 42
 background_images_dir = "/scratch/cek28/jitter/wt/images/"
 final_results_dir = "/home/fcw/Synthetic-Images-Test/Synthetic-Imagery/"
 gp_gan_dir = "/home/fcw/Blended-Synthetic-Imagery-for-Climate-Object-Detection/Synthetic-Image-Generation/GP-GAN/"
+g_path = "/scratch/public/GP-GAN/models/blending_gan.npz"
 
 # Dataset arguments
 domains = "EM NW SW"
@@ -27,7 +28,7 @@ num_synthetic_images_per_domain = 5
 objects_augmenter_has_access_to = 90
 experiment_name = "first_experiment"
 
-cmd = f"python3 synthetic_dataset_generation.py --implantable-objects-dir {implantable_objects_dir} --objects-augmenter-has-access-to {objects_augmenter_has_access_to} --augmented-images-results-dir {augmented_images_results_dir} --random-seed {random_seed} --num-objects-to-sample-per-image-constant {num_objects_to_sample_per_image_constant} --background-images-dir {background_images_dir} --final-results-dir {final_results_dir} --gp-gan-dir {gp_gan_dir} --domains {domains} --num-synthetic-images-per-domain {num_synthetic_images_per_domain} --experiment-name {experiment_name} --generate-unique-src-augmentations --generate-all-augmentations-first --verbose"
+cmd = f"python3 synthetic_dataset_generation.py --g-path {g_path} --implantable-objects-dir {implantable_objects_dir} --objects-augmenter-has-access-to {objects_augmenter_has_access_to} --augmented-images-results-dir {augmented_images_results_dir} --random-seed {random_seed} --num-objects-to-sample-per-image-constant {num_objects_to_sample_per_image_constant} --background-images-dir {background_images_dir} --final-results-dir {final_results_dir} --gp-gan-dir {gp_gan_dir} --domains {domains} --num-synthetic-images-per-domain {num_synthetic_images_per_domain} --experiment-name {experiment_name} --generate-unique-src-augmentations --generate-all-augmentations-first --verbose"
 
 print(cmd)
 

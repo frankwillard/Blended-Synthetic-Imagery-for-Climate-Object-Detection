@@ -3,14 +3,14 @@ from blend_with_gp_gan import blend_with_gp_gan
 import argparse
 
 def generate_synthetic_image(objects_to_implant_img_fpaths, out_shape, objects_to_implant_lbl_fpaths, augmented_images_results_dir, out_fname, random_seed,
-                             num_objects_to_sample_per_image, offset_ctr, gp_gan_blend_offset, gp_gan_dir, dst_img, blended_img_out_path, generate_src_augmentations, verbose=False):
+                             num_objects_to_sample_per_image, offset_ctr, gp_gan_blend_offset, gp_gan_dir, g_path, dst_img, blended_img_out_path, generate_src_augmentations, verbose=False):
     if generate_src_augmentations:
         src_img_fpath, mask_img_fpath, turbines_used = augment_image(objects_to_implant_img_fpaths, out_shape, objects_to_implant_lbl_fpaths, augmented_images_results_dir, out_fname, random_seed,
                                                          num_objects_to_sample_per_image, offset_ctr, gp_gan_blend_offset)
     else:
         raise NotImplementedError("Currently only generating augmentations for the source domain is supported.")
     
-    blend_with_gp_gan(gp_gan_dir, src_img_fpath, dst_img, mask_img_fpath, blended_img_out_path = blended_img_out_path, verbose = verbose)
+    blend_with_gp_gan(gp_gan_dir, g_path, src_img_fpath, dst_img, mask_img_fpath, blended_img_out_path = blended_img_out_path, verbose = verbose)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Creates a synthetic image by placing random objects and blending them with background images blending images through the GP-GAN')
@@ -84,6 +84,7 @@ if __name__ == "__main__":
     parser.add_argument('--dst-img', type=str, required = True, help='File path for background image')
     parser.add_argument('--blended-img-out-path', type=str, required = True, help='File path to output blended synthetic image')
     parser.add_argument('--gp-gan-dir', type=str, required=True, help='Directory including the GP-GAN code')
+    parser.add_argument('--g-path', type=str, required=True, help='File path to the GP-GAN generator model')
 
     args = parser.parse_args()
 
@@ -105,6 +106,7 @@ if __name__ == "__main__":
     dst_img = args.dst_img
     blended_img_out_path = args.blended_img_out_path
     gp_gan_dir = args.gp_gan_dir
+    g_path = args.g_path
     
     generate_synthetic_image(objects_to_implant_img_fpaths, out_shape, objects_to_implant_lbl_fpaths, augmented_images_results_dir, out_fname, random_seed, num_objects_to_sample_per_image,
-                             offset_ctr, gp_gan_blend_offset, gp_gan_dir, dst_img, blended_img_out_path, generate_src_augmentations, verbose)
+                             offset_ctr, gp_gan_blend_offset, gp_gan_dir, g_path, dst_img, blended_img_out_path, generate_src_augmentations, verbose)

@@ -2,13 +2,15 @@ import subprocess
 import argparse
 import os
 
-def blend_with_gp_gan(gp_gan_dir, src_img, dst_img, mask_img, blended_img_out_path = None, results_folder = None, list_path = None, verbose=False):
+def blend_with_gp_gan(gp_gan_dir, g_path, src_img, dst_img, mask_img, blended_img_out_path = None, results_folder = None, list_path = None, verbose=False):
     """
     Blend the source image with the destination image using the mask image
     and save the blended image to the specified output path using GP-GAN.
 
     Parameters:
     ----------
+        gp_gan_dir (str): Path to the GP-GAN directory.
+        g_path (str): Path to the pretrained blending GP-GAN model.
         src_img (str): Path to the source image file.
         dst_img (str): Path to the destination image file.
         mask_img (str): Path to the mask image file.
@@ -36,7 +38,7 @@ def blend_with_gp_gan(gp_gan_dir, src_img, dst_img, mask_img, blended_img_out_pa
     assert list_path or (src_img and dst_img and mask_img), "Either list_path or src_img, dst_img, and mask_img must be specified"
 
     #Copies txt file of mask to synthetic output
-    cmd = f"python3 {gp_gan_dir}/run_gp_gan.py"
+    cmd = f"python3 {gp_gan_dir}/run_gp_gan.py --g_path {g_path}"
 
     if list_path is not None:
         cmd += f" --list_path {list_path}"
@@ -46,7 +48,7 @@ def blend_with_gp_gan(gp_gan_dir, src_img, dst_img, mask_img, blended_img_out_pa
     if blended_img_out_path is not None:
         cmd += f" --blended_image {blended_img_out_path}"
     elif results_folder is not None:
-        cmd += f" --results_folder {results_folder}"
+        cmd += f" --result_folder {results_folder}"
 
     if verbose:
         print("Running command:")
@@ -59,12 +61,13 @@ if __name__ == "__main__":
 
     # GP-GAN arguments
     parser.add_argument('--gp-gan-dir', type=str, required=True, help='Directory including the GP-GAN code')
+    parser.add_argument('--g-path', type=str, required=True, help='File path to the GP-GAN generator model')
     parser.add_argument('--src-img', type=str, required = True, help='File path for source image to blend into destination image')
     parser.add_argument('--dst-img', type=str, required = True, help='File path of destination image to blend source image into')
     parser.add_argument('--mask-img', type=str, required = True, help='File path of mask image with information as to where to blend source image into destination image')
     parser.add_argument('--blended-img-out-path', type=str, default = None, help='File path of mask image with information as to where to blend source image into destination image')
     parser.add_argument('--results-folder', type=str, default = None, help='File path of mask image with information as to where to blend source image into destination image')
-    parser.add_argument('--list_path', default='',
+    parser.add_argument('--list-path', default='',
                         help='File for input list of all images to blend in csv format: obj_path;bg_path;mask_path in each line')
     parser.add_argument('--verbose', action='store_true', help='Print out progress of blending')
     args = parser.parse_args()
@@ -73,6 +76,7 @@ if __name__ == "__main__":
 
     # GP-GAN arguments
     gp_gan_dir = args.gp_gan_dir
+    g_path = args.g_path
     src_dir = args.src_dir
     dst_dir = args.dst_dir
     mask_img = args.mask_img
@@ -81,4 +85,4 @@ if __name__ == "__main__":
     list_path = args.list_path
     results_folder = args.results_folder
 
-    blend_with_gp_gan(src_dir, dst_dir, mask_img, blended_img_out_path, results_folder, list_path, verbose)
+    blend_with_gp_gan(gp_gan_dir, g_path, src_dir, dst_dir, mask_img, blended_img_out_path, results_folder, list_path, verbose)
