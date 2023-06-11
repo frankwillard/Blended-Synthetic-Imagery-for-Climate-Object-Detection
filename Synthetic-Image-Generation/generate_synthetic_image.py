@@ -10,7 +10,7 @@ def generate_synthetic_image(objects_to_implant_img_fpaths, out_shape, objects_t
     else:
         raise NotImplementedError("Currently only generating augmentations for the source domain is supported.")
     
-    blend_with_gp_gan(gp_gan_dir, src_img_fpath, dst_img, mask_img_fpath, blended_img_out_path, verbose)
+    blend_with_gp_gan(gp_gan_dir, src_img_fpath, dst_img, mask_img_fpath, blended_img_out_path = blended_img_out_path, verbose = verbose)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Creates a synthetic image by placing random objects and blending them with background images blending images through the GP-GAN')

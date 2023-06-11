@@ -7,10 +7,12 @@ import argparse
 from generate_synthetic_image import generate_synthetic_image
 from helpers import multiple_replace, createPath, iterative_sample_without_replacement
 from get_distribution import return_distribution
+from augment_image import augment_image
+from blend_list_with_gp_gan import blend_list_with_gp_gan
 
 def generate_synthetic_dataset(implantable_objects_dir, out_shape, augmented_images_results_dir, random_seed, num_objects_to_sample_per_image_percentile, num_objects_to_sample_per_image_constant,
                                offset_ctr, gp_gan_blend_offset, real_label_dir, background_images_dir, final_results_dir, gp_gan_dir, domains, num_synthetic_images_per_domain, objects_augmenter_has_access_to,
-                               generate_unique_src_augmentations, verbose=False):
+                               generate_unique_src_augmentations, generate_all_augmentations_first, experiment_name, verbose=False):
     """
     Generate a synthetic image dataset by placing random objects and blending them with background images using GP-GAN.
 
@@ -32,6 +34,8 @@ def generate_synthetic_dataset(implantable_objects_dir, out_shape, augmented_ima
         num_synthetic_images_per_domain (int): Number of augmented images to produce.
         objects_augmenter_has_access_to (int): Number of implanted objects to be able to sample from (will be randomly sampled from the directory).
         generate_unique_src_augmentations (bool): Generate unique source augmentations for each target domain.
+        generate_all_augmentations_first (bool): Generate augmentations first, then blend with background images.
+        experiment_name (str): Name of the experiment.
         verbose (bool): Print out progress of augmentation.
         
     Returns:
@@ -54,6 +58,11 @@ def generate_synthetic_dataset(implantable_objects_dir, out_shape, augmented_ima
     
     total_imgs_count = 0
 
+    if generate_all_augmentations_first:
+        results_folders = []
+        list_path_csv_fname = os.path.join(os.getcwd(), experiment_name, "list_path.csv")
+        list_path_csv = open(list_path_csv_fname, "w")
+    
     for src_domain in domains:
         
         src_img_dir = f"{implantable_objects_dir}/images/{src_domain}/"
@@ -109,11 +118,25 @@ def generate_synthetic_dataset(implantable_objects_dir, out_shape, augmented_ima
 
                 # Want to ensure that each image is unique
                 random_seed = random_seed + total_imgs_count 
-
-                generate_synthetic_image(objects_to_implant_img_fpaths, out_shape, objects_to_implant_lbl_fpaths, augmented_images_results_dir, out_fname, random_seed, num_objects_to_sample_per_image,
-                                         offset_ctr, gp_gan_blend_offset, gp_gan_dir, dst_img, blended_img_out_path, generate_src_augmentations, verbose)
                 
+                if not generate_all_augmentations_first:
+                    generate_synthetic_image(objects_to_implant_img_fpaths, out_shape, objects_to_implant_lbl_fpaths, augmented_images_results_dir, out_fname, random_seed, num_objects_to_sample_per_image,
+                                             offset_ctr, gp_gan_blend_offset, gp_gan_dir, dst_img, blended_img_out_path, generate_src_augmentations, verbose)
+                else:
+                    src_img_fpath, mask_img_fpath, turbines_used = augment_image(objects_to_implant_img_fpaths, out_shape, objects_to_implant_lbl_fpaths, augmented_images_results_dir, out_fname, random_seed,
+                                                                    num_objects_to_sample_per_image, offset_ctr, gp_gan_blend_offset)
+                    results_folders.append(current_subdir)
+                    list_path_csv.write(f"{src_img_fpath}:{dst_img}:{mask_img_fpath}\n")
+
                 total_imgs_count += 1
+    
+    list_path_csv.close()
+
+    if generate_all_augmentations_first:
+        for src_domain in domains:
+            for target_domain in domains:
+                current_subdir = f"{final_results_dir}/s_{src_domain}_t_{target_domain}/"
+                blend_list_with_gp_gan(gp_gan_dir, src_img = None, dst_img = None, mask_img = None, blended_img_out_path = None, results_folder = current_subdir, list_path = list_path_csv_fname, verbose=verbose)
     
     return metadata_dict
 
@@ -172,6 +195,8 @@ if __name__ == "__main__":
     parser.add_argument('--num-synthetic-images-per-domain', type=int, required=True, help='Number of augmented images to produce')
     parser.add_argument('--objects-augmenter-has-access-to', type=int, required=True, help='Number of implanted objects to be able to sample from (will be randomly sampled from directory)')
     parser.add_argument('--generate-unique-src-augmentations', action='store_true', help='Generate unique source augmentations for each target domain')
+    parser.add_argument('--generate-augmentations-first', action='store_true', help='Generate all augmentations first, then blend with background images')
+    parser.add_argument('--experiment-name', type=str, required=True, help='Name of experiment (used for saving results)')
     parser.add_argument('--verbose', action='store_true', help='Print out progress of augmentation')
 
     args = parser.parse_args()
@@ -200,8 +225,10 @@ if __name__ == "__main__":
     num_synthetic_images_per_domain = args.num_synthetic_images_per_domain
     objects_augmenter_has_access_to = args.objects_augmenter_has_access_to
     generate_unique_src_augmentations = args.generate_unique_src_augmentations
+    generate_all_augmentations_first = args.generate_all_augmentations_first
+    experiment_name = args.experiment_name
     verbose = args.verbose
 
     generate_synthetic_dataset(implantable_objects_dir, out_shape, augmented_images_results_dir, random_seed, num_objects_to_sample_per_image_percentile, num_objects_to_sample_per_image_constant,
                                offset_ctr, gp_gan_blend_offset, real_label_dir, background_images_dir, final_results_dir, gp_gan_dir, domains, num_synthetic_images_per_domain, generate_unique_src_augmentations,
-                               verbose)
+                               generate_all_augmentations_first, experiment_name, verbose)
