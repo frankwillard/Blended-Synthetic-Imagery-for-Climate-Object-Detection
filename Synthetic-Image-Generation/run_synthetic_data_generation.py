@@ -24,10 +24,10 @@ domains = "EM NW SW"
 
 num_objects_to_sample_per_image_constant = 3
 num_synthetic_images_per_domain = 5
-objects_augmenter_has_access_to = 100
+objects_augmenter_has_access_to = 90
 experiment_name = "first_experiment"
 
-cmd = f"python3 synthetic_dataset_generation.py --implantable-objects-dir {implantable_objects_dir} --augmented-images-results-dir {augmented_images_results_dir} --random-seed {random_seed} --num-objects-to-sample-per-image-constant {num_objects_to_sample_per_image_constant} --background-images-dir {background_images_dir} --final-results-dir {final_results_dir} --gp_gan_dir {gp_gan_dir} --domains {domains} --num-synthetic-images-per-domain {num_synthetic_images_per_domain} --experiment_name {experiment_name} --generate-unique-src-augmentations --generate_all_augmentations_first --verbose"
+cmd = f"python3 synthetic_dataset_generation.py --implantable-objects-dir {implantable_objects_dir} --objects-augmenter-has-access-to {objects_augmenter_has_access_to} --augmented-images-results-dir {augmented_images_results_dir} --random-seed {random_seed} --num-objects-to-sample-per-image-constant {num_objects_to_sample_per_image_constant} --background-images-dir {background_images_dir} --final-results-dir {final_results_dir} --gp-gan-dir {gp_gan_dir} --domains {domains} --num-synthetic-images-per-domain {num_synthetic_images_per_domain} --experiment-name {experiment_name} --generate-unique-src-augmentations --generate-all-augmentations-first --verbose"
 
 print(cmd)
 

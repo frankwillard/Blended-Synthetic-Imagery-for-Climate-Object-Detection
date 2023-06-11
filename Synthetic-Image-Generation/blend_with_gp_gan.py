@@ -33,7 +33,7 @@ def blend_with_gp_gan(gp_gan_dir, src_img, dst_img, mask_img, blended_img_out_pa
         blend_with_gp_gan('source.jpg', 'destination.jpg', 'mask.png', 'blended.jpg', verbose=True)
     """
 
-    assert args.list_path or (args.src_img and args.dst_img and args.mask_img), "Either list_path or src_img, dst_img, and mask_img must be specified"
+    assert list_path or (src_img and dst_img and mask_img), "Either list_path or src_img, dst_img, and mask_img must be specified"
 
     #Copies txt file of mask to synthetic output
     cmd = f"python3 {gp_gan_dir}/run_gp_gan.py"
