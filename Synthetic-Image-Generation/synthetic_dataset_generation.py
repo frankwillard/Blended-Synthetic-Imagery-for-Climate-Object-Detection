@@ -57,7 +57,7 @@ def generate_synthetic_dataset(implantable_objects_dir, out_shape, augmented_ima
     if num_objects_to_sample_per_image_constant is not None:
       num_objects_to_sample_per_image = num_objects_to_sample_per_image_constant
     
-    total_imgs_count = 0
+    total_imgs_count = 1
 
     if generate_all_augmentations_first:
         list_path_subdir = f"{os.getcwd()}/{experiment_name}/"
@@ -119,17 +119,17 @@ def generate_synthetic_dataset(implantable_objects_dir, out_shape, augmented_ima
                 blended_img_out_path = f"{current_subdir}{dst_address}.jpg"
 
                 # Want to ensure that each image is unique
-                random_seed = random_seed + total_imgs_count 
+                random_seed_added = random_seed + total_imgs_count
                 
                 if not generate_all_augmentations_first:
-                    generate_synthetic_image(objects_to_implant_img_fpaths, out_shape, objects_to_implant_lbl_fpaths, augmented_images_results_dir, out_fname, random_seed, num_objects_to_sample_per_image,
+                    generate_synthetic_image(objects_to_implant_img_fpaths, out_shape, objects_to_implant_lbl_fpaths, augmented_images_results_dir, out_fname, random_seed_added, num_objects_to_sample_per_image,
                                              offset_ctr, gp_gan_blend_offset, gp_gan_dir, g_path, dst_img, blended_img_out_path, generate_src_augmentations, verbose)
                 else:
-                    src_img_fpath, mask_img_fpath, turbines_used = augment_image(objects_to_implant_img_fpaths, out_shape, objects_to_implant_lbl_fpaths, augmented_images_results_dir, out_fname, random_seed,
+                    src_img_fpath, mask_img_fpath, turbines_used = augment_image(objects_to_implant_img_fpaths, out_shape, objects_to_implant_lbl_fpaths, augmented_images_results_dir, out_fname, random_seed_added,
                                                                     num_objects_to_sample_per_image, offset_ctr, gp_gan_blend_offset)
                     list_path_csv.write(f"{src_img_fpath};{dst_img};{mask_img_fpath}\n")
 
-                total_imgs_count += 1
+                total_imgs_count = total_imgs_count + 1
     
     list_path_csv.close()
 

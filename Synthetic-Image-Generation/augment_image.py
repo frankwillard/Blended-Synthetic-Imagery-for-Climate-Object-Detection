@@ -113,6 +113,7 @@ def augment_image(objects_to_implant_img_fpaths, out_shape, objects_to_implant_l
       #  my_pixel_vals = masked_pixels[int(loc_y-size_y_add)+5:int(loc_y+size_y_add)-5,int(loc_x-size_x_add)+5:int(loc_x+size_x_add)-5]
       #curr_rotation += 90
       #if not all((i <= 608 and i >= 0) for i in my_corners) or any(my_pixel_vals.flatten()):
+      
       print("OVERLAP")
       continue
 
