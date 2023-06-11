@@ -126,7 +126,7 @@ def generate_synthetic_dataset(implantable_objects_dir, out_shape, augmented_ima
                 else:
                     src_img_fpath, mask_img_fpath, turbines_used = augment_image(objects_to_implant_img_fpaths, out_shape, objects_to_implant_lbl_fpaths, augmented_images_results_dir, out_fname, random_seed,
                                                                     num_objects_to_sample_per_image, offset_ctr, gp_gan_blend_offset)
-                    list_path_csv.write(f"{src_img_fpath}:{dst_img}:{mask_img_fpath}\n")
+                    list_path_csv.write(f"{src_img_fpath};{dst_img};{mask_img_fpath}\n")
 
                 total_imgs_count += 1
     
