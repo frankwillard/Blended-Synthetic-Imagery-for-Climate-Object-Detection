@@ -4,22 +4,24 @@ import random
 import glob
 import shutil
 
+
 def multiple_replace(dict, text):
-  """
-  Perform multiple replacements in a given text based on a dictionary.
+    """
+    Perform multiple replacements in a given text based on a dictionary.
 
-  Args:
-      dict (dict): A dictionary where keys represent patterns to be replaced and values are the corresponding replacements.
-      text (str): The input text to perform replacements on.
+    Args:
+        dict (dict): A dictionary where keys represent patterns to be replaced and values are the corresponding replacements.
+        text (str): The input text to perform replacements on.
 
-  Returns:
-      str: The text with replacements applied based on the provided dictionary.
-  """
-  # Create a regular expression  from the dictionary keys
-  regex = re.compile("(%s)" % "|".join(map(re.escape, dict.keys())))
+    Returns:
+        str: The text with replacements applied based on the provided dictionary.
+    """
+    # Create a regular expression  from the dictionary keys
+    regex = re.compile("(%s)" % "|".join(map(re.escape, dict.keys())))
 
-  # For each match, look-up corresponding value in dictionary
-  return regex.sub(lambda mo: dict[mo.string[mo.start():mo.end()]], text) 
+    # For each match, look-up corresponding value in dictionary
+    return regex.sub(lambda mo: dict[mo.string[mo.start() : mo.end()]], text)
+
 
 def createPath(curr_subdir):
     """
@@ -64,10 +66,13 @@ def iterative_sample_without_replacement(population, n):
         remaining_samples = n - len(population)
         while remaining_samples > 0:
             # Sample the remaining elements without replacement
-            sampled_list.extend(random.sample(population, min(remaining_samples, len(population))))
+            sampled_list.extend(
+                random.sample(population, min(remaining_samples, len(population)))
+            )
             remaining_samples -= len(population)
 
     return sampled_list
+
 
 def move_synthetic_files_to_domain_pair_subdirectories(directory, verbose=False):
     """
@@ -81,13 +86,13 @@ def move_synthetic_files_to_domain_pair_subdirectories(directory, verbose=False)
     """
 
     # file_pattern = os.path.join(directory, 'obj_src_*_mask*_bg_*_mask_*.png')
-    file_pattern = os.path.join(directory, '*.png')
+    file_pattern = os.path.join(directory, "*.png")
     file_paths = glob.glob(file_pattern)
 
     for file_path in file_paths:
         filename = os.path.basename(file_path)
-        src_domain = filename.split('_')[2]
-        target_domain = filename.split('_')[7]
+        src_domain = filename.split("_")[2]
+        target_domain = filename.split("_")[7]
         subdirectory = f"s_{src_domain}_t_{target_domain}"
         destination_dir = os.path.join(directory, subdirectory)
 

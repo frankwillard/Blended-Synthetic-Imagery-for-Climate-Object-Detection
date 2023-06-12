@@ -22,7 +22,7 @@ domains = "EM NW SW"
 # generate_unique_src_augmentations = True
 # verbose = True
 
-#### MAIN HYPERPARAMETERS ####
+# ============ MAIN HYPERPARAMETERS =================
 
 num_objects_to_sample_per_image_constant = 3
 num_synthetic_images_per_domain = 5
