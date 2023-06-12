@@ -9,7 +9,14 @@ from skimage.transform import resize
 
 
 class H5pyDataset(dataset_mixin.DatasetMixin):
-    def __init__(self, path, which_set='train', load_size=None, crop_size=None, dtype=numpy.float32):
+    def __init__(
+        self,
+        path,
+        which_set="train",
+        load_size=None,
+        crop_size=None,
+        dtype=numpy.float32,
+    ):
         from fuel.datasets.hdf5 import H5PYDataset
 
         self._dtype = dtype
@@ -31,11 +38,12 @@ class H5pyDataset(dataset_mixin.DatasetMixin):
         min_size = min(w, h)
         ratio = self._load_size / min_size
         rw, rh = int(math.ceil(w * ratio)), int(math.ceil(h * ratio))
-        im = resize(im, (rw, rh), order=1, mode='constant')
+        im = resize(im, (rw, rh), order=1, mode="constant")
 
-        sx, sy = numpy.random.random_integers(0, rw - self._crop_size), numpy.random.random_integers(0,
-                                                                                                     rh - self._crop_size)
-        im = im[sx:sx + self._crop_size, sy:sy + self._crop_size, :] * 2 - 1
+        sx, sy = numpy.random.random_integers(
+            0, rw - self._crop_size
+        ), numpy.random.random_integers(0, rh - self._crop_size)
+        im = im[sx : sx + self._crop_size, sy : sy + self._crop_size, :] * 2 - 1
 
         im = numpy.asarray(numpy.transpose(im, (2, 0, 1)), dtype=self._dtype)
 
@@ -43,8 +51,19 @@ class H5pyDataset(dataset_mixin.DatasetMixin):
 
 
 class BlendingDataset(dataset_mixin.DatasetMixin):
-    def __init__(self, total_examples, folders, root, ratio, load_size, crop_size, dtype=numpy.float32):
-        imgs_per_folder = {folder: glob.glob(os.path.join(root, folder, '*')) for folder in folders}
+    def __init__(
+        self,
+        total_examples,
+        folders,
+        root,
+        ratio,
+        load_size,
+        crop_size,
+        dtype=numpy.float32,
+    ):
+        imgs_per_folder = {
+            folder: glob.glob(os.path.join(root, folder, "*")) for folder in folders
+        }
         self._len = total_examples
 
         self._dtype = dtype
@@ -56,15 +75,17 @@ class BlendingDataset(dataset_mixin.DatasetMixin):
         self._imgs = []
         for _ in range(self._len):
             folder = numpy.random.choice(folders)
-            obj_path, bg_path = numpy.random.choice(imgs_per_folder[folder], 2, replace=False)
+            obj_path, bg_path = numpy.random.choice(
+                imgs_per_folder[folder], 2, replace=False
+            )
             self._imgs.append((obj_path, bg_path))
 
     def __len__(self):
         return self._len
 
     def _crop(self, im, rw, rh, sx, sy):
-        im = resize(im, (rw, rh), order=1, preserve_range=False, mode='constant')
-        im = im[sx:sx + self._crop_size, sy:sy + self._crop_size, :] * 2 - 1
+        im = resize(im, (rw, rh), order=1, preserve_range=False, mode="constant")
+        im = im[sx : sx + self._crop_size, sy : sy + self._crop_size, :] * 2 - 1
         im = numpy.transpose(im, (2, 0, 1)).astype(self._dtype)
 
         return im
@@ -78,15 +99,18 @@ class BlendingDataset(dataset_mixin.DatasetMixin):
         min_size = min(w, h)
         ratio = self._load_size / min_size
         rw, rh = int(math.ceil(w * ratio)), int(math.ceil(h * ratio))
-        sx, sy = numpy.random.random_integers(0, rw - self._crop_size), numpy.random.random_integers(0,
-                                                                                                     rh - self._crop_size)
+        sx, sy = numpy.random.random_integers(
+            0, rw - self._crop_size
+        ), numpy.random.random_integers(0, rh - self._crop_size)
 
         obj_croped = self._crop(obj, rw, rh, sx, sy)
         bg_croped = self._crop(bg, rw, rh, sx, sy)
 
         copy_paste = bg_croped.copy()
-        copy_paste[:, self._sx:self._sx + self._size, self._sx:self._sx + self._size] = obj_croped[:,
-                                                                                        self._sx:self._sx + self._size,
-                                                                                        self._sx:self._sx + self._size]
+        copy_paste[
+            :, self._sx : self._sx + self._size, self._sx : self._sx + self._size
+        ] = obj_croped[
+            :, self._sx : self._sx + self._size, self._sx : self._sx + self._size
+        ]
 
         return copy_paste, bg_croped
