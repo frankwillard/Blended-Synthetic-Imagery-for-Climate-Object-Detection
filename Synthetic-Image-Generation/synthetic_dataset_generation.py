@@ -1,4 +1,5 @@
 import glob
+import json
 import os
 import random
 import argparse
@@ -70,6 +71,8 @@ def generate_synthetic_dataset(
     ----------
         metadata_dict (dict): A dictionary containing the metadata for the generated synthetic images.
     """
+    
+    domain_dict = json.load(open(domain_dict_path, 'r'))
 
     replacer = {"images": "labels", ".jpg": ".txt", ".png": ".txt"}
 
@@ -131,15 +134,9 @@ def generate_synthetic_dataset(
             current_subdir = f"{final_results_dir}/{dict_name}/"
             createPath(current_subdir)
             
-            def select_background(number, domain, root, domain_dict):
-                numbers = domain_dict['Background'][domain][:number]
-                c = [os.path.join(root, 'images', 'Synthetic', f'{key}/{_}.jpg') for _ in numbers]
-                cl = [os.path.join(root, 'labels', 'Synthetic', f'{key}/{_}.txt') for _ in numbers]
-                return c, cl
-            
             # Fetch target background filepaths.
-            background_image_keys = domain_dict['Background'][domain][:number]
-            all_dsts = [os.path.join(root, 'images', 'Synthetic', f'{key}/{_}.jpg') for _ in numbers]
+            background_image_keys = domain_dict[target_domain]['Background'][:num_target_background_images]
+            all_dsts = [os.path.join(root, 'images', target_domain, 'Background', f'{_}.jpg') for _ in background_image_keys]
 
             # Randomly sample n target backgrounds.
             random.seed(random_seed)
