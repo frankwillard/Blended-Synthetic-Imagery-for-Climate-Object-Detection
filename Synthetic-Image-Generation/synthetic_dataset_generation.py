@@ -24,11 +24,13 @@ def generate_synthetic_dataset(
     offset_ctr,
     gp_gan_blend_offset,
     real_label_dir,
-    background_images_dir,
     final_results_dir,
     gp_gan_dir,
     g_path,
     domains,
+    root,
+    domain_dict_path,
+    num_target_background_images,
     num_synthetic_images_per_domain,
     objects_augmenter_has_access_to,
     generate_unique_src_augmentations,
@@ -50,11 +52,13 @@ def generate_synthetic_dataset(
         offset_ctr (int): The offset center used for random positioning of turbine images.
         gp_gan_blend_offset (int): The blend offset used for masking.
         real_label_dir (str): Directory holding real labels to get distribution from (subdirs are domains).
-        background_images_dir (str): Directory for background images (subdir of domain, subdir of Background).
         final_results_dir (str): Directory for output_images (subdir of s-src-t-target per domain combination).
         gp_gan_dir (str): Directory including the GP-GAN code.
         g_path (str): Path to the pretrained blending GP-GAN model.
         domains (list): Domains in the dataset.
+        root (str): Root of the directory containing the experiment images and labels.
+        domain_dict_path (str): Path to domain dict controlling images accessible for the experiment.
+        num_target_background_images (int): Number of target background images available to the synthetic image generator.
         num_synthetic_images_per_domain (int): Number of augmented images to produce.
         objects_augmenter_has_access_to (int): Number of implanted objects to be able to sample from (will be randomly sampled from the directory).
         generate_unique_src_augmentations (bool): Generate unique source augmentations for each target domain.
@@ -97,6 +101,7 @@ def generate_synthetic_dataset(
             len(implantable_objects_file_paths) >= objects_augmenter_has_access_to
         ), "Not enough objects to augment with as designated in variable objects_augmenter_has_access_to."
 
+        random.seed(random_seed)
         objects_to_implant_img_fpaths = random.sample(
             implantable_objects_file_paths, objects_augmenter_has_access_to
         )
@@ -125,11 +130,19 @@ def generate_synthetic_dataset(
             dict_name = f"s_{src_domain}_t_{target_domain}"
             current_subdir = f"{final_results_dir}/{dict_name}/"
             createPath(current_subdir)
+            
+            def select_background(number, domain, root, domain_dict):
+                numbers = domain_dict['Background'][domain][:number]
+                c = [os.path.join(root, 'images', 'Synthetic', f'{key}/{_}.jpg') for _ in numbers]
+                cl = [os.path.join(root, 'labels', 'Synthetic', f'{key}/{_}.txt') for _ in numbers]
+                return c, cl
+            
+            # Fetch target background filepaths.
+            background_image_keys = domain_dict['Background'][domain][:number]
+            all_dsts = [os.path.join(root, 'images', 'Synthetic', f'{key}/{_}.jpg') for _ in numbers]
 
-            dest_dir = f"{background_images_dir}/{target_domain}/Background/"
-            all_dsts = glob.glob(dest_dir + "*.jpg")
-
-            # Randomly sample n images from all_dsts
+            # Randomly sample n target backgrounds.
+            random.seed(random_seed)
             dst_imgs = iterative_sample_without_replacement(
                 all_dsts, num_synthetic_images_per_domain
             )
@@ -268,12 +281,6 @@ if __name__ == "__main__":
 
     # GP-GAN arguments
     parser.add_argument(
-        "--background-images-dir",
-        type=str,
-        required=True,
-        help="Directory (do not include the final slash) for backgrounds (subdir of domain, subdir of Background)",
-    )
-    parser.add_argument(
         "--final-results-dir",
         type=str,
         required=True,
@@ -295,6 +302,28 @@ if __name__ == "__main__":
         required=True,
         help="Number of augmented images to produce",
     )
+    
+    parser.add_argument(
+        "--root",
+        type=str,
+        required=True,
+        help="Root of the directory containing the experiment images and labels.",
+    )
+    
+    parser.add_argument(
+        "--domain-dict-path",
+        type=str,
+        required=True,
+        help="Path to domain dictionary containing images for experiments.",
+    )
+    
+    parser.add_argument(
+        "--num-target-background-images",
+        type=int,
+        required=True,
+        help="Number of target background images available to the synthetic image generator",
+    )
+    
     parser.add_argument(
         "--objects-augmenter-has-access-to",
         type=int,
@@ -347,13 +376,15 @@ if __name__ == "__main__":
     real_label_dir = args.real_label_dir
 
     # GP-GAN arguments
-    background_images_dir = args.background_images_dir
     final_results_dir = args.final_results_dir
     gp_gan_dir = args.gp_gan_dir
     g_path = args.g_path
 
     # Dataset arguments
     domains = args.domains
+    root = args.root
+    domain_dict_path = args.domain_dict_path
+    num_target_background_images = args.num_target_background_images
     num_synthetic_images_per_domain = args.num_synthetic_images_per_domain
     objects_augmenter_has_access_to = args.objects_augmenter_has_access_to
     generate_unique_src_augmentations = args.generate_unique_src_augmentations
@@ -371,11 +402,13 @@ if __name__ == "__main__":
         offset_ctr,
         gp_gan_blend_offset,
         real_label_dir,
-        background_images_dir,
         final_results_dir,
         gp_gan_dir,
         g_path,
         domains,
+        root,
+        domain_dict_path,
+        num_target_background_images,
         num_synthetic_images_per_domain,
         objects_augmenter_has_access_to,
         generate_unique_src_augmentations,
