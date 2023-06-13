@@ -85,7 +85,6 @@ def move_synthetic_files_to_domain_pair_subdirectories(directory, verbose=False)
         None
     """
 
-    # file_pattern = os.path.join(directory, 'obj_src_*_mask*_bg_*_mask_*.png')
     file_pattern = os.path.join(directory, "*.png")
     file_paths = glob.glob(file_pattern)
 
