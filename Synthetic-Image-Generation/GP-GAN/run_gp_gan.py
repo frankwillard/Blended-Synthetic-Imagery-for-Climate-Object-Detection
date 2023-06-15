@@ -178,13 +178,13 @@ def main():
             imsave(args.blended_image, blended_im)
         else:
             imsave(
-                "{}/obj_{}_bg_{}_mask_{}.png".format(
+                "{}/{}_bg_{}.jpg".format(
                     args.result_folder,
                     basename(test_list[idx][0]),
-                    basename(test_list[idx][1]),
-                    basename(test_list[idx][2]),
+                    basename(test_list[idx][1])
                 ),
                 blended_im,
+                quality=100
             )
 
 

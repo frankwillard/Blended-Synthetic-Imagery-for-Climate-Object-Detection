@@ -85,13 +85,13 @@ def move_synthetic_files_to_domain_pair_subdirectories(directory, verbose=False)
         None
     """
 
-    file_pattern = os.path.join(directory, "*.png")
+    file_pattern = os.path.join(directory, "*.jpg")
     file_paths = glob.glob(file_pattern)
 
     for file_path in file_paths:
         filename = os.path.basename(file_path)
-        src_domain = filename.split("_")[2]
-        target_domain = filename.split("_")[7]
+        src_domain = filename.split("_")[1]
+        target_domain = filename.split("_")[3]
         subdirectory = f"s_{src_domain}_t_{target_domain}"
         destination_dir = os.path.join(directory, subdirectory)
 
