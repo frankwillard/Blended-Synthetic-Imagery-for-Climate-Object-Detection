@@ -61,7 +61,7 @@ def generate_synthetic_dataset(
         domain_dict_path (str): Path to domain dict controlling images accessible for the experiment.
         num_target_background_images (int): Number of target background images available to the synthetic image generator.
         num_synthetic_images_per_domain (int): Number of augmented images to produce.
-        objects_augmenter_has_access_to (int): Number of implanted objects to be able to sample from (will be randomly sampled from the directory).
+        objects_augmenter_has_access_to (str): Number of implanted objects to be able to sample from (will be randomly sampled from the directory). To use all, pass in "all".
         generate_unique_src_augmentations (bool): Generate unique source augmentations for each target domain.
         generate_all_augmentations_first (bool): Generate augmentations first, then blend with background images.
         experiment_name (str): Name of the experiment.
@@ -99,14 +99,23 @@ def generate_synthetic_dataset(
         implantable_objects_file_paths = []
         for file_type in file_types:
             implantable_objects_file_paths.extend(glob.glob(src_img_dir + file_type))
+        
+        if objects_augmenter_has_access_to == "all":
+            num_objects = len(implantable_objects_file_paths)
+        else:
+            num_objects = int(objects_augmenter_has_access_to)
+        
+        if verbose:
+            print(f"Sampling {num_objects} from {src_domain}")        
 
         assert (
-            len(implantable_objects_file_paths) >= objects_augmenter_has_access_to
+            len(implantable_objects_file_paths) >= num_objects
         ), "Not enough objects to augment with as designated in variable objects_augmenter_has_access_to."
 
+        # Sample n objects without replacement.
         random.seed(random_seed)
         objects_to_implant_img_fpaths = random.sample(
-            implantable_objects_file_paths, objects_augmenter_has_access_to
+            implantable_objects_file_paths, num_objects
         )
 
         # Labels in exact same order as images
@@ -140,6 +149,8 @@ def generate_synthetic_dataset(
 
             # Randomly sample n target backgrounds.
             random.seed(random_seed)
+            if verbose:
+                print(f"Sampling {num_synthetic_images_per_domain} target background")
             dst_imgs = iterative_sample_without_replacement(
                 all_dsts, num_synthetic_images_per_domain
             )
@@ -323,9 +334,10 @@ if __name__ == "__main__":
     
     parser.add_argument(
         "--objects-augmenter-has-access-to",
-        type=int,
-        required=True,
-        help="Number of implanted objects to be able to sample from (will be randomly sampled from directory)",
+        type=str,
+        required=False,
+        default = "all",
+        help="Number of implanted objects to be able to sample from (will be randomly sampled from directory). If all, then all available are used.",
     )
     parser.add_argument(
         "--generate-unique-src-augmentations",
