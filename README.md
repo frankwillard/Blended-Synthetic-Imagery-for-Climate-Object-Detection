@@ -4,37 +4,18 @@ Pipeline for the code from the paper [Closing the Domain Gap -- Blended Syntheti
 
 [Link to paper PDF](https://s3.us-east-1.amazonaws.com/climate-change-ai/papers/neurips2022/37/paper.pdf)
 
-General pipeline:
-* Collect dataset of images clustered by domain (including both Real Images and Background Images to have objects blended onto)
-* Optional: Create set of cropped objects for each domain (./Image-Augmentation/crop_shadows.py)
-* Sample said objects and randomly place them on canvases, create corresponding masks and YOLO labels (./Image-Augmentation/csv_augmenter.py)
-* Blend said augmented canvases (and their masks) with background images using the GP-GAN (./GP-GAN/gp_gan_one_to_one.py)
+In submission for Environmental Data Science Journal
 
-## Assumed File Directory Structure
+## Generate Single Synthetic Image
 
-For some of the scripts, there is an assumed file structure including subdirectories of domains in order to not require one to pass a different directory for every domain.
+To generate an individual synthetic image, you can call run `python generate_synthetic_image.py`. There are various arguments to be used that can be found with the `--help` flag.  
 
-augment_images.py assumes:
-* cropped_dir- Directory for cropped images/labels - Has a subdir of images and a subdir of labels (whose subdirs are the domain names)
-    * Example: cropped_dir = "/dir1/cropped/", domains = ["NW", "SE"]
-        * cropped_dir has subdirs of "images" and "labels"
-        * The "images" subdir and "labels" subdir both have subdirs of "NW" and "SE" (the example domains)
-* real_label_dir- Directory holding real labels to get distribution from (subdirs are domains)
-    * Example: real_label_dir = "/dir1/labels/", domains = ["NW", "SE"]
-        * real_label_dir has subdirs of "NW" and "SE"
-        * "NW" and "SE" directories have subdir of "Real"
+Make sure you have downloading the blending_gan.npz file from the GP-GAN codebase or pre-trained the GP-GAN.
 
-gp_gan_one_to_one.py assumes:
-* src_dir- Directory for augmented canvases/masks/labels (will be created by Image-Augmentation so will adhere)
-* dst_dir- Directory for background images (subdir of domain, subdir of Background)
-    * Example: dst_dir: "/dir1/images/", domains = ["NW", "SE"]
-        * dst_dir has subdirs of "NW" and "SE"
-        * "NW" and "SE" directories have subdir of "Background"
-   
-## Image-Augmentation
+## Generate Synthetic Dataset
 
-[Image-Augmentation README](https://github.com/frankwillard/Blended-Synthetic-Imagery-for-Climate-Object-Detection/blob/main/Image-Augmentation/README.md)
+To generate a synthetic dataset, you can build a wrapper that calls `python generate_synthetic_image.py`. We developed the `synthetic_dataset_generation.py` wrapper for our dataset creation, which includes some hard-coded information and file paths necessary for our experiments. There are various arguments you can find with the `--help` flag. 
 
-## GP-GAN
+Make sure you have downloading the blending_gan.npz file from the GP-GAN codebase or pre-trained the GP-GAN.
 
-[GP-GAN README](https://github.com/frankwillard/Blended-Synthetic-Imagery-for-Climate-Object-Detection/blob/main/GP-GAN/README.md)
+Note: Running a wrapper that generates all image augmentations and then blends all images through the GP-GAN is more computationally efficient than generating each entire image (about 7 times as fast). This is because the GP-GAN must load the pre-trained model every time the run gp gan script is called, which may take 5-6 seconds. If we call it 200 times to generate 200 images, it will have to re-load that model 200 times, whereas if we call the script one time with a list of all of the images and destinations, it will only have to load the model once.
