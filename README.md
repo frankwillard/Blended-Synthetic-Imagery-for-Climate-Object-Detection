@@ -1,6 +1,6 @@
 # Blended-Synthetic-Imagery-for-Climate-Object-Detection
 
-Pipeline for the code from the paper [Closing the Domain Gap -- Blended Synthetic Imagery for Climate Object Detection (Papers Track)](https://www.climatechange.ai/papers/neurips2022/37)
+Official repository for the code from the paper [Closing the Domain Gap -- Blended Synthetic Imagery for Climate Object Detection (Papers Track)](https://www.climatechange.ai/papers/neurips2022/37)
 
 [Link to paper PDF](https://s3.us-east-1.amazonaws.com/climate-change-ai/papers/neurips2022/37/paper.pdf)
 
