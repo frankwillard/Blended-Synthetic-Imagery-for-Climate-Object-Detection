@@ -6,6 +6,10 @@ Pipeline for the code from the paper [Closing the Domain Gap -- Blended Syntheti
 
 In submission for Environmental Data Science Journal
 
+## Environment
+
+The code from the repository was run under the `environment.yml` file. A minimal environment and Dockerfile are being constructed.
+
 ## Pre-Trained GP-GAN model
 
 Download the pretrained model `blending_gan.npz` or `unsupervised_blending_gan.npz` from [Google Drive](https://drive.google.com/open?id=0Bybnpq8dvwudVjBHNWNHUmVSV28), and then put them in the folder `models`. Make sure this model path is passed into the GP-GAN script or set as a default path in the arguments.
